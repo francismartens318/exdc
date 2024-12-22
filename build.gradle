@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'groovy'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.grails.org/grails/core' } // Add Grails Core repository for Groovy artifacts
+
+}
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy-all:3.0.19' // Adjust version as needed
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0' // JUnit 5
+    testImplementation 'org.codehaus.groovy:groovy-test:3.0.19'
+    testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
+    testImplementation 'net.bytebuddy:byte-buddy:1.14.9'
+}
+
+test {
+    useJUnitPlatform()
+}

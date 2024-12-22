@@ -1,0 +1,69 @@
+#version: "3.3"
+
+services:
+  database:
+    restart: unless-stopped
+    image: postgres:12.19
+    volumes:
+      - ./persist/db:/var/lib/postgresql/data
+      - ./createdb.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    environment:
+      - POSTGRES_PASSWORD=changeme
+      - DB_NAME=ccnode
+      - DB_USER=exalate
+      - DB_PASS=exalate
+    networks:
+      - dbnet
+
+  ccnode:
+    restart: "no"
+    #
+    # Change the image tag to the required version
+    # Check Release History on docs.exalate.com for an overview
+    #
+    image: ${IMAGE}
+    platform: linux/amd64
+    ports:
+      - 5005:5005
+      - 9002:9002
+
+    depends_on:
+      - database #wait for postgres to be started, not for ready
+
+    volumes:
+      - ./persist/home:/opt/customconnectornode/data
+      - ../src/main/groovy:/opt/customconnectornode/data/scripts
+      - ./config/start-node.sh:/opt/customconnectornode/install/bin/start-node.sh
+      - ./config/logback.xml:/opt/customconnectornode/install/conf/logback.xml
+    
+    environment:
+     
+
+      - CUSTOMCONNECTORNODE_PG_USER=exalate
+      - CUSTOMCONNECTORNODE_PG_PWD=exalate
+      - CUSTOMCONNECTORNODE_PG_HOST=database
+      - CUSTOMCONNECTORNODE_PG_DB=ccnode
+      - CUSTOMCONNECTORNODE_PORT=9002
+
+      - NODE_SELF_URL=http://localhost:9002
+#      - NODE_SELF_URL=https://exdc-stage.xl8.tech
+
+#      - LETSENCRYPT_HOST=exdc-stage.xl8.tech
+#      - VIRTUAL_HOST=exdc-stage.xl8.tech
+#      - VIRTUAL_PORT=9002
+
+    env_file:
+      - .env
+
+    networks:
+      - dbnet
+      - default
+
+networks:
+  dbnet:
+    driver: bridge
+  default:
+    driver: bridge
+
+
+

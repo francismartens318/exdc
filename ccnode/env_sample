@@ -1,0 +1,32 @@
+# Docker image to use for the custom connector node
+# for instance
+# IMAGE=idalko/customconnectornode:5.20.0-m59
+
+IMAGE=<the image containing the custom connector node>
+
+# The main API class that implements the custom connector functionality
+# for instance
+# CUSTOM_CONNECTOR_API_CLASS_NAME=customconnectornode.discourse.DiscourseApi
+# it must start with customconnectornode and reside under the customconnectornode package
+
+
+CUSTOM_CONNECTOR_API_CLASS_NAME=<class path to the custom connector API class>
+
+
+
+#
+# Add here all the environment variables that are needed by the custom connector API class
+# issuetracker authentication information
+# tip - the proxy information is also used for accessing the exalate console
+
+# Username for authentication with the issue tracker
+TRACKER_USER=<username>
+
+# Password for authentication with the issue tracker
+TRACKER_PASSWORD=<password>
+
+# API key for secure communication with the issue tracker
+TRACKER_API_KEY=<api key>
+
+# Base URL of the issue tracking system
+TRACKER_URL=<base url of the issue tracker>
