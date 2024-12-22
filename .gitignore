@@ -10,6 +10,7 @@ lib/
 
 # secrets file
 .env
+application.properties
 
 # Compiled Java class files
 *.class
@@ -32,6 +33,7 @@ persist/
 # Gradle
 build/
 .gradle/
+
 
 
 

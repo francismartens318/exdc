@@ -3,22 +3,26 @@ plugins {
     id 'groovy'
 }
 
+
 repositories {
     mavenCentral()
     maven { url 'https://repo.grails.org/grails/core' } // Add Grails Core repository for Groovy artifacts
-
 }
 
 dependencies {
     implementation fileTree(dir: 'lib', include: ['*.jar'])
     implementation 'org.codehaus.groovy:groovy-all:3.0.19'
 
+    implementation 'io.projectreactor:reactor-core:3.5.10'
+    implementation 'org.springframework:spring-context:6.1.14'
+    implementation 'org.springframework:spring-webflux:6.1.14'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.codehaus.groovy:groovy-test:3.0.19'
     testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
     testImplementation 'net.bytebuddy:byte-buddy:1.14.9'
 }
+
 test {
     useJUnitPlatform()
 }
