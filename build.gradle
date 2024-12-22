@@ -10,13 +10,15 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.codehaus.groovy:groovy-all:3.0.19' // Adjust version as needed
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0' // JUnit 5
+    implementation fileTree(dir: 'lib', include: ['*.jar'])
+    implementation 'org.codehaus.groovy:groovy-all:3.0.19'
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.codehaus.groovy:groovy-test:3.0.19'
     testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
     testImplementation 'net.bytebuddy:byte-buddy:1.14.9'
 }
-
 test {
     useJUnitPlatform()
 }
