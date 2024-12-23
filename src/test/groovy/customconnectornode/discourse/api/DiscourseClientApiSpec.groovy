@@ -10,9 +10,7 @@ class DiscourseClientApiSpec extends Specification {
 
     @Subject
     DiscourseClient discourseClient = new DiscourseClientImpl(
-            "https://community.exalate.com",
-            "0b63fdeff9ce8385fc856b47c8138fa09c0f337d528ce82933997fd391022995",
-            "xl8bot"
+
     )
 
 def "should get an existing topic"() {
