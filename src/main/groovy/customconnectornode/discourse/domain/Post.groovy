@@ -1,5 +1,7 @@
 package customconnectornode.discourse.domain
 
+import com.exalate.api.domain.hubobject.v1_2.IHubUser
+import com.exalate.basic.domain.hubobject.v1.BasicHubUser
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import groovy.transform.CompileStatic
 import groovy.transform.builder.Builder
@@ -65,6 +67,15 @@ class Post {
     @Override
     String toString() {
         return "Post(id: $id, topic_id: $topic_id, username: $username)"
+    }
+
+    IHubUser getHubUser() {
+
+        IHubUser user = new BasicHubUser()
+        user.setDisplayName(this.display_username)
+        user.setUsername(this.username)
+        user.setKey(this.user_id?.toString())
+        return user
     }
 
 

@@ -5,10 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.CompileStatic
 import groovy.transform.builder.Builder
 import groovy.util.logging.Slf4j
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 @CompileStatic
 @Builder
 class Topic {
+    private static final Logger log = LoggerFactory.getLogger(Topic.class)
+
     List actions_summary
     Boolean admin
     Boolean archived
@@ -121,27 +125,13 @@ class Topic {
 
     @Override
     String toString() {
-        return "Topic(id: $id, title: $title, category: $category, raw: ${raw?.take(20)}...)"
+        return "Topic(id: $id, title: $title, category_id: $category_id ...)"
     }
 
 
-    String isValidForCreation() {
-        String result = ""
 
-        if (!this.title) {
-            result += "title is required, "
-        }
 
-        if (!this.raw) {
-            result += "raw is required, "
-        }
 
-        if (!this.category) {
-            result += "category is required, "
-        }
-
-        return result
-    }
 
 
 
@@ -165,5 +155,27 @@ class Topic {
     Post firstPost() {
         return posts.find { it.post_number == 1 }
     }
+
+    String getTopic_id() {
+        return posts?.first()?.topic_id
+    }
+
+    String getCooked() {
+        return posts?.first()?.cooked
+    }
+
+    String getRaw() {
+        return posts?.first()?.raw
+    }
+
+    Integer getCategory_id() {
+        return category_id
+    }
+
+
+
+
+
+
 
 }

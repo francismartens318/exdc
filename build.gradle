@@ -14,6 +14,12 @@ configurations.configureEach {
     }
 }
 
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ['-Xlint:deprecation']
+    }
+}
+
 repositories {
     mavenCentral()
     maven { url 'https://repo.grails.org/grails/core' } // Add Grails Core repository for Groovy artifacts
@@ -36,6 +42,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.apache.groovy:groovy-test:4.0.5'
     testImplementation 'org.spockframework:spock-core:2.4-M4-groovy-4.0'
+
+    testImplementation 'org.objenesis:objenesis:3.3'
+
 
     testImplementation 'net.bytebuddy:byte-buddy:1.14.9'
 }
