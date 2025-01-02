@@ -13,12 +13,12 @@ class UserAccessClientImpl implements UserAccessClient {
 
     @Override
     User getUser(String userId) {
-        Map userJson = discourseClient.doRequest(DcOps.GET,"/u/${userId}.json")
+        Map userJson = discourseClient.get("/u/${userId}.json")
         if (!userJson || !userJson.containsKey("user")) {
             throw new DiscourseClientException("Request for User with ${userId} didn't result in a parseable user")
         }
 
-        Map emailJson = discourseClient.doRequest(DcOps.GET, "/users/${userId}/emails.json")
+        Map emailJson = discourseClient.get("/users/${userId}/emails.json")
         if (!emailJson || !emailJson.containsKey("email")) {
 
             throw new DiscourseClientException("Request for User with ${userId} didn't result in a parseable user")

@@ -8,10 +8,16 @@ import customconnectornode.discourse.domain.Topic
 interface TopicAccessClient {
     Topic getTopic(String topicId)
 
-    // Return the topic id of the newly created topic
-    String createTopic(String title, String raw, String category)
+    /*
+    *   Create the topic using the title, raw and category
+     */
+    Topic create(Topic topic)
 
-    Topic updateTopic(String topicId, Topic topic)
+    /*
+     * Update the topic as follows
+     */
+
+    Topic update(Topic topic)
 
     Void deleteTopic(String topicId)
 

@@ -102,9 +102,12 @@ class DiscourseClientImpl implements DiscourseClient {
         addHeaders(request)
         logRequest(request)
         ClassicHttpResponse response = httpClient.execute(request)
+        if (response.code == 404) {
+            log.debug("Got a 404 response when retrieving ${path}")
+            return null
+        }
+
         checkResponse(request, response)
-
-
         Object json = jsonSlurper.parse(response.entity.content)
         return json as Map
 
@@ -112,6 +115,24 @@ class DiscourseClientImpl implements DiscourseClient {
     @Override
     Map post(String path, Object body, Map<String, Object> params = [:]) {
         def request = new HttpPost(buildUri(path, params))
+
+
+        addHeaders(request)
+        String jsonBody = new JsonBuilder(body).toString()
+        StringEntity entity = new StringEntity(jsonBody, ContentType.APPLICATION_JSON)
+        request.setEntity(entity)
+
+        logRequest(request)
+        ClassicHttpResponse response = httpClient.execute(request)
+        checkResponse(request, response)
+        Object json = jsonSlurper.parse(response.entity.content)
+        return json as Map
+    }
+
+
+    @Override
+    Map doPut(String path, Object body, Map<String, Object> params = [:]) {
+        def request = new HttpPut(buildUri(path, params))
 
 
         addHeaders(request)

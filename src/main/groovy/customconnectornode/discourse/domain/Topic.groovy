@@ -128,14 +128,6 @@ class Topic {
         return "Topic(id: $id, title: $title, category_id: $category_id ...)"
     }
 
-
-
-
-
-
-
-
-
     static Topic fromJson(Map topicData) {
         ObjectMapper mapper = new ObjectMapper()
         Topic topic = mapper.convertValue(topicData, Topic.class)
@@ -157,20 +149,23 @@ class Topic {
     }
 
     String getTopic_id() {
-        return posts?.first()?.topic_id
+        return topic_id ?: posts?.first()?.topic_id
     }
 
     String getCooked() {
-        return posts?.first()?.cooked
+        // the cooked is calculated from the first post
+        return  posts?.first()?.cooked
     }
 
     String getRaw() {
-        return posts?.first()?.raw
+        //  the raw is calculated from the first post, given that the raw on the topic which can contain the summary of the topic.
+        return posts?.first()?.raw ?: raw
     }
 
     Integer getCategory_id() {
         return category_id
     }
+
 
 
 

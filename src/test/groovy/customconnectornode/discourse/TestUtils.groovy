@@ -23,6 +23,7 @@ class TestUtils {
         System.setProperty("TRACKER_URL", dotenv.get("TRACKER_URL"))
         System.setProperty("TRACKER_API_KEY", dotenv.get("TRACKER_API_KEY"))
         System.setProperty("TRACKER_USER", dotenv.get("TRACKER_USER"))
+        System.setProperty("TRACKER_PASSWORD", dotenv.get("TRACKER_PASSWORD"))
     }
 
 }

@@ -26,11 +26,15 @@ import com.exalate.api.domain.hubobject.EntityType
 import com.exalate.api.domain.hubobject.IHubIssueReplica
 import com.exalate.api.domain.twintrace.INonPersistentTrace
 import com.exalate.api.exception.IssueTrackerException
+import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
+import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.TopicAccessClient
+import customconnectornode.discourse.domain.Post
 import customconnectornode.discourse.domain.Topic
 import customconnectornode.discourse.http.DiscourseClientException
+import customconnectornode.discourse.http.DiscourseClientImpl
 import customconnectornode.discourse.http.TopicAccessClientImpl
-import customconnectornode.discourse.transform.TopicReplicaBuilder
+import customconnectornode.discourse.transform.TopicReplica
 import customconnectornode.domain.*
 import customconnectornode.services.api.IIssueTrackerApi
 import org.slf4j.Logger
@@ -45,42 +49,24 @@ class DiscourseApi implements IIssueTrackerApi {
 
     private static final Logger log = LoggerFactory.getLogger(DiscourseApi.class)
     private final Application application
-    private final String discourseUrl
-    private final String discourseUser
-    private final String discoursePassword
-    private final String discourseApiKey
 
-    private final TopicAccessClient discourseClient
+    private final TopicAccessClient topicAccessClient
+    private final DiscourseClient discourseClient
 
 
 
     @Inject
     DiscourseApi(Application application) {
         this.application = application
-
-
-
-        log.debug("Initializing DiscourseApi")
-        // Get required environment variables
-        this.discourseUrl = System.getProperty('TRACKER_URL')
-        this.discourseUser = System.getProperty('TRACKER_USER')
-        this.discoursePassword = System.getProperty('TRACKER_PASSWORD')
-        this.discourseApiKey = System.getProperty('TRACKER_API_KEY')
-
-
-        log.debug("Discourse URL: {}", discourseUrl)
-        log.debug("Discourse User: {}", discourseUser)
-        log.debug("Discourse Password: {}", discoursePassword)
-        log.debug("Discourse API Key: {}", discourseApiKey)
-        // Validate required environment variables
-        if (!discourseUrl || !discourseUser || !discoursePassword || !discourseApiKey) {
-            log.error("Missing required environment variables")
-            throw new IllegalStateException("Missing required environment variables. Please set TRACKER_URL, TRACKER_USER, and TRACKER_PASSWORD")
-        }
-
-        this.discourseClient = new TopicAccessClientImpl(discourseUrl, discourseApiKey, discourseUser)
+        this.discourseClient = new DiscourseClientImpl()
+        this.topicAccessClient = new TopicAccessClientImpl(discourseClient)
 
         log.debug("DiscourseApi initialized successfully")
+    }
+
+    // used in test
+    TopicAccessClient getTopicAccessClient() {
+        return topicAccessClient
     }
 
     @Override
@@ -111,11 +97,14 @@ class DiscourseApi implements IIssueTrackerApi {
         }
 
         // fetch the topic from the Discourse API
-        Topic topic = discourseClient.getTopic(entityKey.getURN()).block()
+
+        Topic topic = topicAccessClient.getTopic(entityKey.getURN())
 
         // convert to IHubIssueReplica
-        return TopicReplicaBuilder.build(topic)
+        return topic ? TopicReplica.toReplica(topic) : null
     }
+
+
 
     @Nonnull
     @Override
@@ -126,10 +115,35 @@ class DiscourseApi implements IIssueTrackerApi {
         List<INonPersistentTrace> traces,
         List<StreamableFileMetadata> blobMetadataList
     ) {
+
+        Topic changeTopic = TopicReplica.toTopic((BasicHubIssue) entityAfterScript)
+
+        // First create a topic from the entityAfterScript.  This will be used to either create or update the topic
+        // in Discourse.
+        if  (entityKey == null) {
+            // if there is no entity key - first create the entity
+            // note that additional information from the hubIssue, such as comments, tags etc will be added during the update step
+            log.debug("Entity key is empty, creating new topic using title, description and category ")
+
+            Topic toCreateTopic = TopicReplica.toTopic((BasicHubIssue) entityAfterScript)
+            String createdTopicId = topicAccessClient.create(toCreateTopic)?.topic_id
+            Topic createdTopic = topicAccessClient.getTopic(createdTopicId)
+
+            // populate the acquired fields id and topic_id
+            changeTopic.id = createdTopic.id
+            changeTopic.topic_id = createdTopic.topic_id
+
+            // add the created topic to the list of posts
+
+            List<Post> buildPosts = createdTopic.posts + changeTopic.posts.drop(1)
+            changeTopic.posts = buildPosts
+        }
+
+
         log.debug("Writing entity with key: {}", entityKey)
-        // Basic implementation returning the entity after script
-        log.debug("Successfully wrote entity: {}", entityKey)
-        return new EntityWriteResult(entityAfterScript, traces)
+        Topic updatedTopic = topicAccessClient.update(changeTopic)
+
+        return new EntityWriteResult(TopicReplica.toReplica(updatedTopic), traces)
     }
 
     @Override
@@ -162,13 +176,13 @@ class DiscourseApi implements IIssueTrackerApi {
     }
 
     
-    boolean isEntityDeleted(@Nonnull IIssueKey entityKey) {
+    boolean isEntityDeleted(IIssueKey entityKey) {
         return false // Basic implementation assuming entities are not deleted
     }
 
     
-    void deleteEntity(@Nonnull IIssueKey entityKey) {
-        throw new IssueTrackerException("Delete operation not supported")
+    void deleteEntity( IIssueKey entityKey) {
+        throw new IssueTrackerException("Delete not supported")
     }
 
     

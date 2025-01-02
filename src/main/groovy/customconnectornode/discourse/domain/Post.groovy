@@ -69,15 +69,4 @@ class Post {
         return "Post(id: $id, topic_id: $topic_id, username: $username)"
     }
 
-    IHubUser getHubUser() {
-
-        IHubUser user = new BasicHubUser()
-        user.setDisplayName(this.display_username)
-        user.setUsername(this.username)
-        user.setKey(this.user_id?.toString())
-        return user
-    }
-
-
-
 }

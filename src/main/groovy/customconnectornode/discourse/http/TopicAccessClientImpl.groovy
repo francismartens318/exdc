@@ -27,39 +27,101 @@ class TopicAccessClientImpl implements TopicAccessClient {
     @Override
     Topic getTopic(String topicId) {
         Map resultJson = discourseClient.get("/t/${topicId}.json")
-        return Topic.fromJson(resultJson)
+        return resultJson ? Topic.fromJson(resultJson) : null
     }
 
-    @Override
-    String createTopic(String title, String raw, String category) {
-        log.debug("Creating Topic with title ${title} and category ${category}")
+
+
+    Topic create(Topic topic) {
         Map createJson = [
-                title: title,
-                raw: raw,
-                category: category
+                title: topic.title,
+                raw: topic.raw,
+                category: topic.category
         ]
 
-        Map topicJson = discourseClient.post("/posts", createJson as Object)
-        return topicJson.topic_id
+        return Topic.fromJson(discourseClient.post("/posts", createJson as Object))
+
+    }
+
+
+    // update the topic first post if the title, raw or cooked fields have changed
+    private void updateTopicPost(Topic oldTopic, Topic newTopic) {
+        if (newTopic.posts?.size() < 1) {
+            log.debug("Topic has no posts - probably a new topic - skipping update")
+            return
+        }
+
+        Map updatedFields = [:]
+
+        if (oldTopic.title != newTopic.title) updatedFields.title = newTopic.title
+        if (oldTopic.raw != newTopic.raw) updatedFields.raw = newTopic.raw
+
+        if (updatedFields.isEmpty()) {
+            log.debug("No post fields to update for topic: {}", newTopic)
+            return
+        }
+
+        log.debug("Updating topic post (topic ${newTopic} with fields ${updatedFields.keySet()}")
+
+        Long postId = newTopic.posts?.first()?.id
+
+        discourseClient.doPut("/posts/${postId}", updatedFields)
+    }
+
+    // update the topic meta if the category, tags or title have changed
+    private void updateTopicMeta(Topic oldTopic, Topic newTopic) {
+        Map updatedFields = [:]
+        if (oldTopic.category != newTopic.category) updatedFields.category = newTopic.category
+        if (oldTopic.tags != newTopic.tags) updatedFields.tags = newTopic.tags
+        if (oldTopic.title != newTopic.title) updatedFields.title = newTopic.title
+        if (updatedFields.isEmpty()) {
+            log.debug("No topic fields to update for topic: {}", newTopic)
+            return
+        }
+
+        log.debug("Updating topic meta (topic ${newTopic} with fields ${updatedFields.keySet()}")
+        discourseClient.doPut("/t/${newTopic.topic_id}", updatedFields)
+    }
+
+    private void mergeTopicPosts(Topic oldTopic, Topic newTopic) {
+        // For all comments in newTopic without an id - assuming it is new, add a post to the topic
+        newTopic.posts?.each { post ->
+            if (!post.id) {
+                addPost(newTopic.topic_id, post.raw)
+            }
+        }
+
+        // TODO - delete posts which have been deleted in newTopic
     }
 
     @Override
-    Topic updateTopic(String topicId, Topic topic) {
+    Topic update(Topic topic) {
+
+
         log.debug("Updating topic: {}", topic)
-        def request = new HttpPut("${baseUrl}/t/${topicId}")
-        addHeaders(request)
-        request.entity = new StringEntity(JsonOutput.toJson(topic))
-        logRequest(request)
-
-        def response = httpClient.execute(request) { response ->
-            checkResponse(response)
-
-            def json = jsonSlurper.parse(response.entity.content)
-            return Topic.fromJson(json as Map)
+        if (!topic.id) {
+            throw new DiscourseClientException("Trying to update a topic without an id - was it created first? (Topic: ${topic})")
         }
 
-        return Mono.just(response)
+        if (topic.posts?.size() < 1) {
+            // looks like a new topic, so this is an inappropriate call as the post doesn't exist yet
+            throw new DiscourseClientException("Trying to update a topic without a post - was it created first? (Topic: ${topic})")
+        }
+
+        // updating a topic is about updating the content of the first post
+        Topic oldTopic = getTopic(topic.topic_id)
+
+        // some fields need to be updated in the topic itself, other fields need to be updated in the first post
+
+        mergeTopicPosts(oldTopic, topic)
+        updateTopicPost(oldTopic, topic)
+        updateTopicMeta(oldTopic, topic)
+
+
+        return (getTopic(topic.topic_id))
+
     }
+
 
     @Override
     Void deleteTopic(String topicId) {
@@ -124,11 +186,9 @@ class TopicAccessClientImpl implements TopicAccessClient {
         log.debug("Fetching topics updated since: {}", utcDate.take(10))
 
         Map searchResult = discourseClient.get("/search.json?q=after:${utcDate.take(10)}")
-        return searchResult.topics?.collect { it ->
-            if (it.created_at >= utcDate) {
-                return it.id as String
-            }
-        }
+
+        // return the topic ids created after 'since'.
+        return searchResult.topics?.findAll() {it.created_at >= utcDate }?.collect { it.id as String }
     }
 
 

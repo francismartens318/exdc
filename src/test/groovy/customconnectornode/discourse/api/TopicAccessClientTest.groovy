@@ -4,6 +4,7 @@ package customconnectornode.discourse.api
 import customconnectornode.discourse.TestUtils
 import customconnectornode.discourse.domain.Post
 import customconnectornode.discourse.domain.Topic
+import customconnectornode.discourse.domain.TopicTest
 import customconnectornode.discourse.http.DiscourseClientImpl
 import customconnectornode.discourse.http.TopicAccessClientImpl
 import spock.lang.Specification
@@ -13,21 +14,24 @@ class TopicAccessClientTest extends Specification {
 
     @Subject
     TopicAccessClient topicAccessClient
+    TopicTest topicTest
 
     def setup() {
         TestUtils.setupSpec()
 
         topicAccessClient = new TopicAccessClientImpl(new DiscourseClientImpl())
+        topicTest = new TopicTest(topicAccessClient)
+
     }
 
-def "should get an existing topic"() {
-    given:
+    def "should get an existing topic"() {
+        given:
         String topic_id = "7"
 
-    when:
+        when:
         Topic aTopic = topicAccessClient.getTopic(topic_id)
 
-    then:
+        then:
         aTopic != null
         aTopic.title == "Test Topic to check the test cases"
         aTopic.posts_count == 6
@@ -35,122 +39,138 @@ def "should get an existing topic"() {
         aTopic.topic_id == "7"
     }
 
-def "should create a new topic"() {
-    given:
-
-        String title = "My Test Topic to check the test cases " + System.currentTimeMillis()
-        String raw = "This is the description of my test topic " + System.currentTimeMillis()
-        String category = "4"
+    def "should create a new topic"() {
+        given:
 
 
-    when:
-        String createdTopicId = topicAccessClient.createTopic(title,raw, category)
-        Topic fetchedTopic = topicAccessClient.getTopic(createdTopicId)
 
-    then:
-        fetchedTopic != null
-        fetchedTopic.title == title
-        fetchedTopic.category_id == 4
-        fetchedTopic.posts_count == 1
+
+        when:
+        Topic aTopic = topicTest.createAndFetchTopic("topic creation")
+
+        then:
+        aTopic != null
+        aTopic.category_id == 4
+        aTopic.posts_count == 1
     }
 
-def "should add a post to an existing topic"() {
-    given:
+    def "should add a post to an existing topic"() {
+        given:
         // Create a new topic first
-        String title = "Topic for Post Test " + System.currentTimeMillis()
-        String raw = "This is the description of my test topic " + System.currentTimeMillis()
-        String category = "4"
+        Topic aTopic = topicTest.createAndFetchTopic("Add post to topic")
 
         // Prepare post content
         def postContent = "This is a new post added to the topic " + System.currentTimeMillis()
 
-    when:
-        String createdTopicId = topicAccessClient.createTopic(title, raw, category)
-        topicAccessClient.addPost(createdTopicId, postContent)
-        Topic fetchedTopic = topicAccessClient.getTopic(createdTopicId)
+        when:
+        topicAccessClient.addPost(aTopic.topic_id, postContent)
+        Topic fetchedTopic = topicAccessClient.getTopic(aTopic.topic_id)
 
-    then:
+        then:
         fetchedTopic != null
-        fetchedTopic.title == title
+        fetchedTopic.title == aTopic.title
         fetchedTopic.posts[0].username == System.getProperty("TRACKER_USER")
         fetchedTopic.posts_count == 2
     }
 
-def "should add 5 posts to a single topic"() {
-    given:
-        // Create initial topic
-        String title = "Topic for Multiple Posts Test " + System.currentTimeMillis()
-        String raw = "Initial topic content for multiple posts"
-        String category = "4"
-
-        String createdTopicId = topicAccessClient.createTopic(title, raw, category)
+    def "should add 5 posts to a single topic"() {
+        given:
+        // Create a new topic first
+        Topic aTopic = topicTest.createAndFetchTopic("Add 5 posts to topic")
 
 
         // Create 50 posts
         def posts = []
         5.times { index ->
             def postContent = "This is post number ${index + 1} added at " + System.currentTimeMillis()
-            topicAccessClient.addPost(createdTopicId, postContent)
+            topicAccessClient.addPost(aTopic.topic_id, postContent)
         }
 
-    when:
+        when:
         // Get the topic to verify all posts
-        Topic finalTopic = topicAccessClient.getTopic(createdTopicId)
+        Topic finalTopic = topicAccessClient.getTopic(aTopic.topic_id)
 
 
-    then:
+        then:
         finalTopic != null
         finalTopic.posts_count == 6  // Initial post + 5 additional posts
 
         Post topicPost = finalTopic.firstPost()
-        topicPost.topic_id == createdTopicId
+        topicPost.topic_id == aTopic.topic_id
     }
 
-def "should return topics created by xl8bot"() {
-    given:
+    def "should return topics created by xl8bot"() {
+        given:
+        Topic aTopic = topicTest.createAndFetchTopic("Find proxy user topics")
         String trackerUser = System.getProperty("TRACKER_USER")
-        // Create initial topic
-        String title ="${trackerUser} Test Topic " + System.currentTimeMillis()
-        String raw = "Content created by ${trackerUser}"
-        String category = "4"
 
-        String createdTopicId = topicAccessClient.createTopic(title, raw, category)
-
-
-    when:
+        when:
         String queryForXl8Bot = "@${trackerUser}"
         List<String> topicIds = topicAccessClient.searchTriggers(queryForXl8Bot)
 
-    then:
+        then:
         topicIds != null
         !topicIds.isEmpty()
-        topicIds.contains(createdTopicId)
+        topicIds.contains(aTopic.topic_id)
         Topic topic = topicAccessClient.getTopic(topicIds[0])
         topic.posts[0]?.username == trackerUser
     }
 
-def "should return topics created 10 seconds ago"() {
-    given:
+    def "should return topics created 2 seconds ago"() {
+        given:
         long currentMillis = System.currentTimeMillis()
         String trackerUser = System.getProperty("TRACKER_USER")
-        // Create initial topic
-        String title ="${trackerUser} Test Topic " + System.currentTimeMillis()
-        String raw = "Content created by ${trackerUser} to validate the latestUpdated method"
-        String category = "4"
+        Topic aTopic = topicTest.createAndFetchTopic("Search topics created not more than 2 seconds ago")
 
-        String createdTopicId = topicAccessClient.createTopic(title, raw, category)
-        sleep(1000)  // Wait for 9 seconds
+        sleep(2000)  // Wait for 2 seconds
 
-    when:
+        when:
 
         List<String> topicIds = topicAccessClient.latestUpdated(currentMillis)
 
-    then:
+        then:
         topicIds != null
-            !topicIds.isEmpty()
+        !topicIds.isEmpty()
+        topicIds.contains(aTopic.topic_id)
 
-        // Assuming tht no other topics were created in the last 10 seconds
-        topicIds[0] == createdTopicId
+        // the number of topics should be limited
+        topicIds.size() < 10
 
+    }
+
+    def "should only update the topic raw, but not the title"() {
+        given:
+        Topic aTopic = topicTest.createAndFetchTopic("Update raw")
+
+        when:
+        Long currentTimeMillis = System.currentTimeMillis()
+        aTopic.raw = "This is the updated raw content of the topic " + currentTimeMillis
+        Topic fetchedTopic = topicAccessClient.update(aTopic)
+
+
+        then:
+        fetchedTopic != null
+        fetchedTopic.title == aTopic.title
+
+        // check if the cooked is different (raw is not available)
+        fetchedTopic.cooked != aTopic.cooked
+        fetchedTopic.cooked.contains(currentTimeMillis.toString())
+    }
+
+    def "should add existing tags"() {
+        given:
+        Topic aTopic = topicTest.createAndFetchTopic("tag update check")
+
+        when:
+        Long currentTimeMillis = System.currentTimeMillis()
+        aTopic.tags = ["testcase", "spock"]
+        Topic fetchedTopic = topicAccessClient.update(aTopic)
+
+
+        then:
+        fetchedTopic != null
+        fetchedTopic.title == aTopic.title
+        fetchedTopic.tags?.contains("testcase")
+        fetchedTopic.tags?.contains("spock")
     }
 }
