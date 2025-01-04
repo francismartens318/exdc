@@ -70,9 +70,13 @@ export CUSTOM_CONNECTOR_ALWAYS_RELOAD=true
 
 echo "starting Exalate for Custom Connector node"
 echo "-----------------------------------------"
-echo "Scripts directory"
+echo "+++ Scripts directory"
 ls -lR /opt/customconnectornode/data/scripts/customconnectornode
-echo "Environment"
+
+echo "+++ lib directory"
+ls -lR /opt/customconnectornode/install/lib
+
+echo "+++ Environment"
 printenv
 echo "-----------------------------------------"
 

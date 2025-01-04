@@ -1,3 +1,26 @@
+/*
+ * Copyright (c) 2024 Exalate (https://exalate.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package customconnectornode.discourse.domain
 
 import com.fasterxml.jackson.annotation.JsonAnySetter
@@ -35,7 +58,6 @@ class Topic {
     String created_at
     Integer current_post_number
     String deleted_at
-    String deleted_by
     Map details
     String display_username
     String discourse_zendesk_plugin_zendesk_id
@@ -118,6 +140,7 @@ class Topic {
     Integer vote_count
     Integer word_count
     Boolean yours
+    String origin_url // not a field in the json
 
     @JsonAnySetter
     Map<String, Object> unknownFields = new HashMap<>()
@@ -128,7 +151,7 @@ class Topic {
         return "Topic(id: $id, title: $title, category_id: $category_id ...)"
     }
 
-    static Topic fromJson(Map topicData) {
+    static Topic fromJson(Map topicData, String sourceUrl = null) {
         ObjectMapper mapper = new ObjectMapper()
         Topic topic = mapper.convertValue(topicData, Topic.class)
 
@@ -138,9 +161,9 @@ class Topic {
                 return Post.fromJson(postData as Map)
             }
         }
+        // add the topic_origin_url to the topic
+        topic.origin_url = sourceUrl
 
-
-        // ensure topic_id is set if not yet set
         return topic
     }
 

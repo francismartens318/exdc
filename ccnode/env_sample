@@ -6,7 +6,7 @@ IMAGE=<the image containing the custom connector node>
 
 # The main API class that implements the custom connector functionality
 # for instance
-# CUSTOM_CONNECTOR_API_CLASS_NAME=customconnectornode.discourse.DiscourseApi
+# CUSTOM_CONNECTOR_API_CLASS_NAME=customconnectornode.discourse.DiscourseApiOld
 # it must start with customconnectornode and reside under the customconnectornode package
 
 

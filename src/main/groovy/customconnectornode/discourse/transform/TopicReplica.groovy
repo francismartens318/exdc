@@ -1,9 +1,34 @@
+/*
+ * Copyright (c) 2024 Exalate (https://exalate.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package customconnectornode.discourse.transform
 
+import com.exalate.api.domain.IIssueKey
 import com.exalate.api.domain.hubobject.v1_2.HubCustomFieldType
 import com.exalate.api.domain.hubobject.v1_2.IHubLabel
 import com.exalate.api.domain.hubobject.v1_2.IHubUser
 import com.exalate.api.domain.hubobject.v1_6.IHubCustomField
+import com.exalate.basic.domain.BasicIssueKey
 import com.exalate.basic.domain.hubobject.v1.BasicHubComment
 import com.exalate.basic.domain.hubobject.v1.BasicHubCustomField
 import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
@@ -29,7 +54,7 @@ class TopicReplica {
         return user
     }
 
-    static IHubCustomField buildCustomField (Long id, String name, Integer uid, String description, HubCustomFieldType type, String value) {
+    static IHubCustomField buildCustomField (Long id, String name, String uid, String description, HubCustomFieldType type, String value) {
         IHubCustomField icf = new BasicHubCustomField()
 
         icf.id = id
@@ -42,27 +67,26 @@ class TopicReplica {
 
     static void addCategory(BasicHubIssue replica, String category) {
         replica.customFields.put("category",
-                buildCustomField(1L, "Category",category as Integer, "Category section", HubCustomFieldType.STRING, category)
+                buildCustomField(1L, "Category", category, "Category section", HubCustomFieldType.STRING, category)
         )
     }
     static BasicHubIssue toReplica(Topic topic) {
         BasicHubIssue replica = new BasicHubIssue()
 
-        //BasicIssueKey key = new BasicIssueKey(topic.id as String, topic.topic_id, DiscourseEntity.TOPIC.label)
 
         replica.id = topic.id as String
         replica.key = topic.topic_id
         replica.created = Utils.getDateFromString(topic.created_at)
         replica.updated = Utils.getDateFromString(topic.updated_at)
         replica.summary = topic.title
-        replica.description = topic.raw
+        replica.description = topic.cooked
         replica.labels = topic.tags.collect { String tag ->
-                                                IHubLabel label = new BasicHubLabel(tag)
+                                                IHubLabel label = new BasicHubLabel()
                                                 label.label = tag
                                             }
 
 
-        addCategory(replica, topic.category)
+        addCategory(replica, topic.category_id as String)
 
         // add posts as comments, excluding the first post because that is the topic itself
 
@@ -77,6 +101,9 @@ class TopicReplica {
                 }
 
 
+
+        replica.entityKey = toEntityKey(topic)
+        replica.setEntityUrl(topic.origin_url)
         return replica
     }
 
@@ -115,6 +142,8 @@ class TopicReplica {
 
 
 
+        def tagList = basicHubIssue.getLabels().collect { it.label.toString() }
+
 
         Topic topic = new Topic().builder()
                 .id(basicHubIssue.id as Long)
@@ -125,11 +154,15 @@ class TopicReplica {
                 .updated_at(Utils.getStringFromDate(basicHubIssue.updated))
                 .category(basicHubIssue.customFields?.get("category")?.uid as String)
                 .category_id(basicHubIssue.customFields?.get("category")?.uid as Integer)
-                .tags(basicHubIssue.getLabels().collect  {label -> label.name })
+                .tags(tagList)
                 .posts(posts)
                 .post_number(posts.size())
                 .build()
         return topic
 
+    }
+
+    static  IIssueKey toEntityKey(Topic topic) {
+        return new BasicIssueKey(topic.id as String, topic.topic_id, "topic")
     }
 }

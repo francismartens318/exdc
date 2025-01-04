@@ -1,22 +1,34 @@
 package customconnectornode.discourse.domain
 
+import com.exalate.basic.domain.hubobject.v1.BasicHubComment
+import com.exalate.basic.domain.hubobject.v1.BasicHubUser
 import customconnectornode.discourse.DiscourseApi
 import customconnectornode.discourse.api.TopicAccessClient
-import org.spockframework.runtime.SpecificationContext
 
-class TopicTest {
+class TopicTestUtil {
 
     TopicAccessClient topicAccessClient
-    SpecificationContext specificationContext
 
-    TopicTest(DiscourseApi dc) {
+    TopicTestUtil(DiscourseApi dc) {
         topicAccessClient = dc.getTopicAccessClient()
     }
 
-    TopicTest(TopicAccessClient tac) {
+    TopicTestUtil(TopicAccessClient tac) {
         topicAccessClient = tac
     }
 
+    static BasicHubComment someComment(String commentBody) {
+        BasicHubComment hubComment = new BasicHubComment()
+        hubComment.author = new BasicHubUser()
+        hubComment.author.displayName = "Kwak Dot Duck"
+        hubComment.author.email = "kwak318@duck.com"
+        hubComment.author.key = "4" // 4 is the user id of the test user kwak318
+        hubComment.author.username = "kwak318"
+        hubComment.body = commentBody
+        hubComment.created = new Date()
+        hubComment.internal = false
+        return hubComment
+    }
 
     // Create a generic topic - do not persist in Discourse
 

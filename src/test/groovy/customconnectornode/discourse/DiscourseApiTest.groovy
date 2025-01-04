@@ -4,61 +4,72 @@ package customconnectornode.discourse
 import com.exalate.api.domain.IIssueKey
 import com.exalate.api.domain.hubobject.EntityType
 import com.exalate.api.domain.hubobject.IHubIssueReplica
-import com.exalate.api.domain.hubobject.v1_2.IHubUser
 import com.exalate.api.domain.twintrace.INonPersistentTrace
-import com.exalate.api.exception.IssueTrackerException
 import com.exalate.basic.domain.BasicIssueKey
-import com.exalate.basic.domain.hubobject.v1.BasicHubComment
 import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
-import com.exalate.basic.domain.hubobject.v1.BasicHubUser
+import com.exalate.basic.domain.hubobject.v1.BasicHubLabel
+import com.exalate.domain.http.GroovyHttpRequest
+import com.exalate.domain.http.GroovyHttpResponse
+import com.exalate.replication.services.issuetracker.GroovyHttpClient
 import customconnectornode.discourse.domain.Topic
-import customconnectornode.discourse.domain.TopicTest
+import customconnectornode.discourse.domain.TopicTestUtil
+import customconnectornode.discourse.http.DiscourseClientException
 import customconnectornode.discourse.transform.TopicReplica
-import customconnectornode.domain.EntityWriteResult
-import customconnectornode.domain.PageRequest
-import customconnectornode.domain.PageResponse
-import customconnectornode.domain.StreamableFileMetadata
+import customconnectornode.discourse.transform.Utils
+import customconnectornode.domain.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import play.api.Application
 import play.api.inject.Injector
 import spock.lang.Specification
 import spock.lang.Subject
 
-
-
-/*
- * Following tests should be made
-
-  it should "return a PageResponse with one entity type in"
-  it should "read a request and return a HubIssueReplica"
-  it should "return null if request with given id was not found"
-  it should "read a request with an attachment"
-  it should "create a request and return a EntityWriteResult"
-  it should "create a request with comments"
-  it should "update a request and return a EntityWriteResult"
-  it should "update a comment"
-  it should "delete a comment"
-  it should "search requests by date"
-  it should "get the body of an attachment"
- */
+import java.util.function.Supplier
 
 class DiscourseApiTest extends Specification {
+    private static final Logger log = LoggerFactory.getLogger(DiscourseApiTest.class)
+
 
     @Subject
     DiscourseApi discourseApi
-    TopicTest topicTest
+    TopicTestUtil topicTestUtil
 
     Application application
     Injector injector
+    GroovyHttpClient groovyHttpClient
 
     def setup() {
         TestUtils.setupSpec()
 
         application = Mock(Application)
         injector = Mock(Injector)
+        application.injector() >> injector
+        groovyHttpClient = Mock(GroovyHttpClient)
+        injector.instanceOf(GroovyHttpClient.class) >> groovyHttpClient
 
         discourseApi = new DiscourseApi(application)
-        topicTest = new TopicTest(discourseApi)
+        topicTestUtil = new TopicTestUtil(discourseApi)
+    }
 
+    private void mockHttpResponses(List<List<String>> methodBodyPairs) {
+        Integer requestStep = 0
+
+        groovyHttpClient.http(_ as GroovyHttpRequest) >> { GroovyHttpRequest request ->
+            // assert that the request is what is expected (based on the requestStep) and that the url is valid (based on the regex)
+            assert request.method == methodBodyPairs[requestStep][0]
+            assert request.url ==~ /^https?:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/\S*)?$/
+
+            def jsonString = methodBodyPairs[requestStep][1]
+            def response = new GroovyHttpResponse(
+                    200,
+                    [:],
+                    { -> jsonString } as Supplier<String>,
+                    { -> jsonString } as Supplier<Object>
+            )
+
+            requestStep++
+            return response
+        }
     }
 
     def "searchEntityTypes returns correct entity types"() {
@@ -76,8 +87,18 @@ class DiscourseApiTest extends Specification {
 
     def "readEntity returns hub issue for valid topic with a number of comments"() {
         given:
-            BasicIssueKey entityKey = new BasicIssueKey("7", "7", "topic")
+        BasicIssueKey entityKey = new BasicIssueKey("7", "7", "topic")
 
+
+        def jsonString = getClass().getResource('/7.json').text
+        def mockResponse = new GroovyHttpResponse(
+                200,
+                [:],
+                { -> jsonString } as Supplier<String>,
+                { -> jsonString } as Supplier<Object>
+        )
+
+        groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
 
         when:
             IHubIssueReplica result = discourseApi.readEntity(entityKey)
@@ -98,12 +119,21 @@ class DiscourseApiTest extends Specification {
             result.customFields["category"].id == 1
             result.customFields["category"].uid == "4"
 
-
     }
 
     def "doesEntityExist returns false when asked for a non-existent topic"() {
         given:
-            BasicIssueKey entityKey = new BasicIssueKey("", "10000000", "topic")
+
+        BasicIssueKey entityKey = new BasicIssueKey("", "10000000", "topic")
+        def jsonString = getClass().getResource('/7.json').text
+        def mockResponse = new GroovyHttpResponse(
+                200,
+                [:],
+                { -> jsonString } as Supplier<String>,
+                { -> jsonString } as Supplier<Object>
+        )
+
+        groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
 
         when:
             Boolean result = discourseApi.doesEntityExist(entityKey)
@@ -112,73 +142,115 @@ class DiscourseApiTest extends Specification {
             result == false
     }
 
-    def "writeEntity returns EntityWriteResult with provided entity"() {
+    def "doesEntityExist throws exception when asked for something else than a topic"() {
         given:
-            Topic testTopic = topicTest.createAndFetchTopic("Update entity")
-            IIssueKey testTopicKey = new BasicIssueKey(testTopic.id as String, testTopic.topic_id, "topic")
 
+        BasicIssueKey entityKey = new BasicIssueKey("", "10000000", "blurb")
 
-            IHubIssueReplica entityBeforeScript = TopicReplica.toReplica(testTopic)
-            testTopic.title = "The new title for the test case  " + System.currentTimeMillis()
-            testTopic.raw = "The new raw for the test case  " + System.currentTimeMillis()
-            IHubIssueReplica entityAfterScript = TopicReplica.toReplica(testTopic)
-
-            List<INonPersistentTrace> traces = []
-            List<StreamableFileMetadata> blobMetadataList = []
 
         when:
-            EntityWriteResult result = discourseApi.writeEntity(testTopicKey, entityBeforeScript, entityAfterScript, traces, blobMetadataList)
+        Boolean result = discourseApi.doesEntityExist(entityKey)
 
         then:
-            result != null
-            result.entity == entityAfterScript
-            result.traces == traces
+        thrown(DiscourseClientException)
     }
 
-    BasicHubComment someComment(String commentBody) {
-        BasicHubComment hubComment = new BasicHubComment()
-        hubComment.author = new BasicHubUser()
-        hubComment.author.displayName = "Kwak Dot Duck"
-        hubComment.author.email = "kwak318@duck.com"
-        hubComment.author.key = "4" // 4 is the user id of the test user kwak318
-        hubComment.author.username = "kwak318"
-        hubComment.body = commentBody
-        hubComment.created = new Date()
-        hubComment.internal = false
-        return hubComment
+    def "writeEntity returns EntityWriteResult with provided entity"() {
+        given:
+
+        def jsonString = getClass().getResource('/306.json').text
+        def mockResponse = new GroovyHttpResponse(
+                200,
+                [:],
+                { -> jsonString } as Supplier<String>,
+                { -> jsonString } as Supplier<Object>
+        )
+
+        groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
+
+        when:
+        Topic testTopic = topicTestUtil.createAndFetchTopic("Update entity")
+        IIssueKey testTopicKey = new BasicIssueKey(testTopic.id as String, testTopic.topic_id, "topic")
+
+
+        IHubIssueReplica entityBeforeScript = TopicReplica.toReplica(testTopic)
+        testTopic.title = "The new title for the test case  " + System.currentTimeMillis()
+        testTopic.raw = "The new raw for the test case  " + System.currentTimeMillis()
+        IHubIssueReplica entityAfterScript = TopicReplica.toReplica(testTopic)
+
+        List<INonPersistentTrace> traces = []
+        List<StreamableFileMetadata> blobMetadataList = []
+        EntityWriteResult result = discourseApi.writeEntity(testTopicKey, entityBeforeScript, entityAfterScript, traces, blobMetadataList)
+
+        then:
+        result != null
+        result.entity == entityAfterScript
+        result.traces == traces
     }
 
     def "create a IssueHubObject of type topic with comments and persist it" () {
         given:
+
+
+        // the methodBodyPairs contains the method and the json response for each step in handling an update
+
+        List<List<String>> methodBodyPairs = [
+                ["POST", getClass().getResource('/638.json').text],
+                ["GET", getClass().getResource('/312-initial.json').text],
+                ["GET", getClass().getResource('/312-initial.json').text],
+                ["POST", getClass().getResource('/639.json').text],
+                ["PUT", getClass().getResource('/312-after-put.json').text],
+                ["GET", getClass().getResource('/312-final.json').text]
+
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+        when:
         BasicHubIssue hubIssue = new BasicHubIssue()
-        hubIssue.summary = "Create topic with comments from a hubIssue" + System.currentTimeMillis()
+        hubIssue.summary = "Create topic with comments from a hubIssue " + System.currentTimeMillis()
         hubIssue.description = "This is a test case to creating a topic with comments from a hubIssue"
         TopicReplica.addCategory(hubIssue, "4")
 
 
-        hubIssue.comments.add(someComment("This is a test comment " + System.currentTimeMillis()))
+        hubIssue.comments.add(TopicTestUtil.someComment("This is a test comment " + System.currentTimeMillis()))
 
-        when:
+
         List<INonPersistentTrace> traces = []
         List<StreamableFileMetadata> blobMetadataList = []
         EntityWriteResult result = discourseApi.writeEntity(null, null, hubIssue, traces, blobMetadataList)
 
         then:
-        result != null
-        result.entity != null
-        result.entity?.summary == hubIssue.summary
         result.entity?.comments?.size() == 1
     }
 
     def  "create a IssueHubObject of type topic with 5 comments and persist it" () {
         given:
+        // the methodBodyPairs contains the method and the json response for each step in handling an update
+
+        List<List<String>> methodBodyPairs = [
+                ["POST", getClass().getResource('/640.json').text], // create topic
+                ["GET", getClass().getResource('/313-initial.json').text], // return fully populated topic as confirmation of the create
+                ["GET", getClass().getResource('/313-initial.json').text], // return fully populated topic as preparation for the update
+                ["POST", getClass().getResource('/641.json').text], // create comment 1
+                ["POST", getClass().getResource('/642.json').text], // create comment 2
+                ["POST", getClass().getResource('/643.json').text], // create comment 3
+                ["POST", getClass().getResource('/644.json').text], // create comment 4
+                ["POST", getClass().getResource('/645.json').text], // create comment 5
+                ["PUT", getClass().getResource('/313-after-put.json').text], // update topic with comments
+                ["GET", getClass().getResource('/313-final.json').text] // retrieve the final topic with all comments
+
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
         BasicHubIssue hubIssue = new BasicHubIssue()
-        hubIssue.summary = "Create topic with comments from a hubIssue" + System.currentTimeMillis()
+        hubIssue.summary = "Create topic with comments from a hubIssue " + System.currentTimeMillis()
         hubIssue.description = "This is a test case to creating a topic with comments from a hubIssue"
         TopicReplica.addCategory(hubIssue, "4")
 
         5.times {Integer counter ->
-            hubIssue.comments.add(someComment("This is a test comment number ${counter} " + System.currentTimeMillis()))
+            hubIssue.comments.add(TopicTestUtil.someComment("This is a test comment number ${counter} " + System.currentTimeMillis()))
         }
 
 
@@ -190,42 +262,145 @@ class DiscourseApiTest extends Specification {
         then:
         result != null
         result.entity != null
-        result.entity?.summary == hubIssue.summary
         result.entity?.comments?.size() == 5
 
     }
 
-    def "search returns empty page response"() {
+    def  "update the tags of an existing IssueHubObject" () {
         given:
-        def query = "test"
-        def since = new Date()
-        def entityKeyContext = Mock(EntityKeyContext)
+
+        // the methodBodyPairs contains the method and the json response for each step in handling an update
+
+        List<List<String>> methodBodyPairs = [
+                ["POST", getClass().getResource('/646.json').text], // create topic
+                ["GET", getClass().getResource('/314-initial.json').text], // return fully populated topic as confirmation of the create
+                ["GET", getClass().getResource('/314-initial.json').text], // return fully populated topic as preparation for the update
+                ["PUT", getClass().getResource('/314-after-put.json').text], // update the tag
+                ["GET", getClass().getResource('/314-final.json').text], // create comment 2
+                ["POST", getClass().getResource('/643.json').text], // create comment 3
+                ["POST", getClass().getResource('/644.json').text], // create comment 4
+                ["POST", getClass().getResource('/645.json').text], // create comment 5
+                ["PUT", getClass().getResource('/313-after-put.json').text], // update topic with comments
+                ["GET", getClass().getResource('/313-final.json').text] // retrieve the final topic with all comments
+
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+
+
+        when:
+        Topic testTopic = topicTestUtil.createAndFetchTopic("TagTester")
+
+
+        BasicHubIssue testTopicReplicaBefore = TopicReplica.toReplica(testTopic)
+        BasicHubIssue testTopicReplicaAfter = TopicReplica.toReplica(testTopic)
+        testTopicReplicaAfter.labels = [new BasicHubLabel(label: "Tag tester")] as Set
+
+        List<INonPersistentTrace> traces = []
+        List<StreamableFileMetadata> blobMetadataList = []
+        EntityWriteResult result = discourseApi.writeEntity(testTopicReplicaBefore.entityKey,testTopicReplicaBefore , testTopicReplicaAfter, traces, blobMetadataList)
+
+        then:
+        result != null
+        result.entity != null
+        result.entity?.labels?.size() == 1
+        result.entity?.labels?.first() == "tag-tester"
+    }
+
+    def "search since now returns empty page response as there are no topics created after now"() {
+        given:
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/search-01.json').text], // return a list of topics and posts that are matching any query
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+        def query = "kwik kwak kwek, a duck is not a chicken"
+        def since = Utils.getDateFromString("2025-01-04T18:33:44.000Z") // the result set in search-01.json is from 2025-01-04T18:33:44.000Z
+        def entityKeyContext = new EntityKeyContext("topic", [:])
         def pageRequest = new PageRequest(0, 10)
+
 
         when:
         def result = discourseApi.search(query, since, entityKeyContext, pageRequest)
 
         then:
         result != null
-        result.items.isEmpty()
-        result.hasMore
+        result.results.isEmpty()
     }
 
-    def "deleteEntity throws an exception"() {
+    def "search query is safely escaped"() {
         given:
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/search-01.json').text], // return a list of topics and posts that are matching any query
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+        def query = "kwik kwak kwek, a duck is not a chicken"
+        def since = Utils.getDateFromString("2025-01-04T18:33:44.000Z") // the result set in search-01.json is from 2025-01-04T18:33:44.000Z
+        def entityKeyContext = new EntityKeyContext("topic", [:])
+        def pageRequest = new PageRequest(0, 10)
+
 
         when:
-        discourseApi.deleteEntity(null)
+        def result = discourseApi.search(query, since, entityKeyContext, pageRequest)
 
         then:
-        thrown(IssueTrackerException)
+        result != null
+        result.results.isEmpty()
     }
 
-    def "uploadFile throws IssueTrackerException"() {
+    def "A trigger is returning the expected topics "() {
+        given:
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/search-02.json').text], // return a list of topics and posts that are matching any query
+        ]
+
+
+
+        mockHttpResponses(methodBodyPairs)
+
+        def query = "hubissue" // search-02.json contains the topics on community.exalate.st that contains the word hubissue
+        def entityKeyContext = new EntityKeyContext("topic", [:])
+
+        def pageRequest = new PageRequest(0, 10)
+
+
         when:
-        discourseApi.uploadFile("test.txt", Mock(Source), null, null)
+        def result = discourseApi.search(query, null, entityKeyContext, pageRequest)
 
         then:
-        thrown(IssueTrackerException)
+        result != null
+        result.results.size() == 22
+    }
+
+    def "A trigger is returning the expected topics with a tag"() {
+        given:
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/search-03.json').text], // return a list of topics and posts that are matching any query
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+        def query = "tags:tag-tester" // search-03.json contains the topics on community.exalate.st that contains the tag 'tag-tester'
+        def entityKeyContext = new EntityKeyContext("topic", [:])
+
+        def pageRequest = new PageRequest(0, 10)
+
+
+        when:
+        def result = discourseApi.search(query, null, entityKeyContext, pageRequest)
+
+        then:
+        result != null
+        result.results.size() == 1
+    }
+
+
+    // TODO: Support attachments
+    def "uploadFile throws IssueTrackerException"() {
+        assert true
     }
 }

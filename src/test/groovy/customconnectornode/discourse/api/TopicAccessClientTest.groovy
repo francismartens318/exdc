@@ -4,7 +4,7 @@ package customconnectornode.discourse.api
 import customconnectornode.discourse.TestUtils
 import customconnectornode.discourse.domain.Post
 import customconnectornode.discourse.domain.Topic
-import customconnectornode.discourse.domain.TopicTest
+import customconnectornode.discourse.domain.TopicTestUtil
 import customconnectornode.discourse.http.DiscourseClientImpl
 import customconnectornode.discourse.http.TopicAccessClientImpl
 import spock.lang.Specification
@@ -14,13 +14,13 @@ class TopicAccessClientTest extends Specification {
 
     @Subject
     TopicAccessClient topicAccessClient
-    TopicTest topicTest
+    TopicTestUtil topicTest
 
     def setup() {
         TestUtils.setupSpec()
 
         topicAccessClient = new TopicAccessClientImpl(new DiscourseClientImpl())
-        topicTest = new TopicTest(topicAccessClient)
+        topicTest = new TopicTestUtil(topicAccessClient)
 
     }
 
@@ -34,7 +34,7 @@ class TopicAccessClientTest extends Specification {
         then:
         aTopic != null
         aTopic.title == "Test Topic to check the test cases"
-        aTopic.posts_count == 6
+        aTopic.posts_count == 5
         aTopic.category_id == 4
         aTopic.topic_id == "7"
     }

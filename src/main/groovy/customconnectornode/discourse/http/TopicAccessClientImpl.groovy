@@ -1,16 +1,36 @@
+/*
+ * Copyright (c) 2024 Exalate (https://exalate.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package customconnectornode.discourse.http
 
 import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.TopicAccessClient
 import customconnectornode.discourse.domain.Topic
-import groovy.json.JsonOutput
 import org.apache.hc.client5.http.classic.methods.HttpDelete
-import org.apache.hc.client5.http.classic.methods.HttpPut
-import org.apache.hc.core5.http.io.entity.StringEntity
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import reactor.core.publisher.Mono
 
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 
 class TopicAccessClientImpl implements TopicAccessClient {
@@ -26,8 +46,11 @@ class TopicAccessClientImpl implements TopicAccessClient {
 
     @Override
     Topic getTopic(String topicId) {
-        Map resultJson = discourseClient.get("/t/${topicId}.json")
-        return resultJson ? Topic.fromJson(resultJson) : null
+        String topicUrl = "/t/${topicId}.json"
+
+
+        Map resultJson = discourseClient.get(topicUrl, [:])
+        return resultJson ? Topic.fromJson(resultJson, discourseClient.buildUri(topicUrl, [:])) : null
     }
 
 
@@ -39,22 +62,22 @@ class TopicAccessClientImpl implements TopicAccessClient {
                 category: topic.category
         ]
 
-        return Topic.fromJson(discourseClient.post("/posts", createJson as Object))
+        return Topic.fromJson(discourseClient.post("/posts", createJson as Object, [:]))
 
     }
 
 
     // update the topic first post if the title, raw or cooked fields have changed
     private void updateTopicPost(Topic oldTopic, Topic newTopic) {
-        if (newTopic.posts?.size() < 1) {
-            log.debug("Topic has no posts - probably a new topic - skipping update")
+        if (newTopic.posts?.size() < 1 || newTopic.posts?.first()?.id == null) {
+            log.debug("Topic has no posts - probably a new topic - skipping update. Also applies when the post is null")
             return
         }
 
+
         Map updatedFields = [:]
 
-        if (oldTopic.title != newTopic.title) updatedFields.title = newTopic.title
-        if (oldTopic.raw != newTopic.raw) updatedFields.raw = newTopic.raw
+        if (oldTopic.cooked != newTopic.cooked && newTopic.raw) updatedFields.raw = newTopic.raw
 
         if (updatedFields.isEmpty()) {
             log.debug("No post fields to update for topic: {}", newTopic)
@@ -64,14 +87,13 @@ class TopicAccessClientImpl implements TopicAccessClient {
         log.debug("Updating topic post (topic ${newTopic} with fields ${updatedFields.keySet()}")
 
         Long postId = newTopic.posts?.first()?.id
-
         discourseClient.doPut("/posts/${postId}", updatedFields)
     }
 
     // update the topic meta if the category, tags or title have changed
     private void updateTopicMeta(Topic oldTopic, Topic newTopic) {
         Map updatedFields = [:]
-        if (oldTopic.category != newTopic.category) updatedFields.category = newTopic.category
+        if (oldTopic.category_id != newTopic.category_id) updatedFields.category_id = newTopic.category_id
         if (oldTopic.tags != newTopic.tags) updatedFields.tags = newTopic.tags
         if (oldTopic.title != newTopic.title) updatedFields.title = newTopic.title
         if (updatedFields.isEmpty()) {
@@ -84,9 +106,10 @@ class TopicAccessClientImpl implements TopicAccessClient {
     }
 
     private void mergeTopicPosts(Topic oldTopic, Topic newTopic) {
-        // For all comments in newTopic without an id - assuming it is new, add a post to the topic
+        int counter
+        // For all comments in newTopic without an id - assuming it is new, add a post to the topic, ignore the first one
         newTopic.posts?.each { post ->
-            if (!post.id) {
+            if (counter++ > 0 && !post.id) {
                 addPost(newTopic.topic_id, post.raw)
             }
         }
@@ -99,13 +122,8 @@ class TopicAccessClientImpl implements TopicAccessClient {
 
 
         log.debug("Updating topic: {}", topic)
-        if (!topic.id) {
+        if (!topic.id || topic.posts?.size() < 1) {
             throw new DiscourseClientException("Trying to update a topic without an id - was it created first? (Topic: ${topic})")
-        }
-
-        if (topic.posts?.size() < 1) {
-            // looks like a new topic, so this is an inappropriate call as the post doesn't exist yet
-            throw new DiscourseClientException("Trying to update a topic without a post - was it created first? (Topic: ${topic})")
         }
 
         // updating a topic is about updating the content of the first post
@@ -155,42 +173,41 @@ class TopicAccessClientImpl implements TopicAccessClient {
         return discourseClient.get("/search.json?q=${encodedQuery}&page=${page}")
     }
 
+
     @Override
-    List<String> searchTriggers(String queryString) {
-        log.debug("Searching triggers with query: {}", queryString)
+    List<Topic> search(String query, Timestamp since) {
+        // compose the search query
 
-        List<String> allTopicIds = []
-        Integer currentPage = 0
-        boolean hasMorePages = true
+        String encodedQuery = query ? URLEncoder.encode(query, 'UTF-8') : ""
+        String separator = encodedQuery ? '&' : ''
+        String utcDate
 
-        while (hasMorePages) {
-            Map searchResult = executeSearchQuery(queryString, currentPage)
-            List<String> topicIds = searchResult.topics?.collect { it.id as String }
-            allTopicIds.addAll(topicIds)
 
-            Integer totalResults = searchResult.total_results as Integer ?: 0
-            Integer perPage = searchResult.per_page as Integer ?: 20
+        // if there is a timestamp, add it to the query
+        if (since) {
+            def sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+            utcDate = sdf.format(new Date(since.getTime()))
 
-            hasMorePages = (currentPage + 1) * perPage < totalResults
-            currentPage++
+            // query for all results updated after midnight of the given date, as Discourse doesn't allow for a time based query
+            encodedQuery = "${encodedQuery}${separator}after:${utcDate.take(10)}"
         }
 
-        return allTopicIds
+        if (!encodedQuery) {
+            // an empty query ...
+            return []
+        }
+
+        log.debug("Fetching topics using the query ${encodedQuery}")
+
+        Map searchResult = discourseClient.get("/search.json?q=${encodedQuery}", [:])
+
+
+        // return the topic ids created after 'since' (if given) and matching the query.
+        return searchResult.topics?.collect { Topic.fromJson(it) }?.findAll { topic ->
+            topic.last_posted_at >= utcDate || topic.created_at >= utcDate
+        }
     }
-
-    @Override
-    List<String> latestUpdated(Long since) {
-        def sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
-        def utcDate = sdf.format(new Date(since))
-        log.debug("Fetching topics updated since: {}", utcDate.take(10))
-
-        Map searchResult = discourseClient.get("/search.json?q=after:${utcDate.take(10)}")
-
-        // return the topic ids created after 'since'.
-        return searchResult.topics?.findAll() {it.created_at >= utcDate }?.collect { it.id as String }
-    }
-
 
 
 }
