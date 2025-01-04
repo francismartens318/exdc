@@ -23,9 +23,11 @@
 
 package customconnectornode.discourse.http
 
+import com.exalate.api.domain.twintrace.INonPersistentTrace
 import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.TopicAccessClient
 import customconnectornode.discourse.domain.Topic
+import customconnectornode.discourse.transform.TopicReplica
 import org.apache.hc.client5.http.classic.methods.HttpDelete
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -105,23 +107,26 @@ class TopicAccessClientImpl implements TopicAccessClient {
         discourseClient.doPut("/t/${newTopic.topic_id}", updatedFields)
     }
 
-    private void mergeTopicPosts(Topic oldTopic, Topic newTopic) {
+    private List<INonPersistentTrace> mergeTopicPosts(Topic oldTopic, Topic newTopic, List<INonPersistentTrace> traces) {
         int counter
         // For all comments in newTopic without an id - assuming it is new, add a post to the topic, ignore the first one
         newTopic.posts?.each { post ->
             if (counter++ > 0 && !post.id) {
-                addPost(newTopic.topic_id, post.raw)
+                String localPostId = addPost(newTopic.topic_id, post.raw)
+                traces.add(TopicReplica.toCommentTrace(localPostId, post.remote_id))
             }
         }
+
+        return traces
 
         // TODO - delete posts which have been deleted in newTopic
     }
 
     @Override
-    Topic update(Topic topic) {
+    Map<String, Object>  update(Topic topic, List<INonPersistentTrace> traces) {
 
 
-        log.debug("Updating topic: {}", topic)
+        log.debug("Updating topic: {} taking into account the traces {}", topic, traces)
         if (!topic.id || topic.posts?.size() < 1) {
             throw new DiscourseClientException("Trying to update a topic without an id - was it created first? (Topic: ${topic})")
         }
@@ -131,32 +136,21 @@ class TopicAccessClientImpl implements TopicAccessClient {
 
         // some fields need to be updated in the topic itself, other fields need to be updated in the first post
 
-        mergeTopicPosts(oldTopic, topic)
+        traces = mergeTopicPosts(oldTopic, topic, traces)
         updateTopicPost(oldTopic, topic)
         updateTopicMeta(oldTopic, topic)
 
 
-        return (getTopic(topic.topic_id))
+        return ([topic:getTopic(topic.topic_id), traces: traces])
 
     }
 
 
+    /*
+    ** Post the new comment to the topic, return the id of the new post
+     */
     @Override
-    Void deleteTopic(String topicId) {
-        log.debug("Deleting topic: {}", topicId)
-        def request = new HttpDelete("${baseUrl}/t/${topicId}")
-        addHeaders(request)
-        logRequest(request)
-
-        httpClient.execute(request) { response ->
-            checkResponse(response)
-        }
-
-        return Mono.empty()
-    }
-
-    @Override
-    void addPost(String aTopicId, String rawContent) {
+    String addPost(String aTopicId, String rawContent) {
         log.debug("Creating post on ${aTopicId} with ${rawContent?.take(20)} ...")
 
         Map postData = [
@@ -165,6 +159,7 @@ class TopicAccessClientImpl implements TopicAccessClient {
         ]
 
         Map topicJson = discourseClient.post("/posts", postData as Object)
+        return topicJson.id as String
     }
 
 
@@ -201,6 +196,8 @@ class TopicAccessClientImpl implements TopicAccessClient {
         log.debug("Fetching topics using the query ${encodedQuery}")
 
         Map searchResult = discourseClient.get("/search.json?q=${encodedQuery}", [:])
+
+        log.debug("Search resulted in ${searchResult?.size()} entries (not yet filtered)")
 
 
         // return the topic ids created after 'since' (if given) and matching the query.

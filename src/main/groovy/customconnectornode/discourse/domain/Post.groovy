@@ -60,6 +60,7 @@ class Post {
     Boolean read
     Integer readers_count
     Integer reads
+    String remote_id // being used to track the posts that have been synced
     Integer reply_count
     Integer reply_to_post_number
     Integer score
@@ -75,6 +76,7 @@ class Post {
     Boolean version
     Boolean wiki
     Boolean yours
+
 
     @JsonAnySetter
     Map<String, Object> unknownFields = new HashMap<>()

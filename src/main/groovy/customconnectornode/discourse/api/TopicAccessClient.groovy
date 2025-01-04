@@ -23,6 +23,7 @@
 
 package customconnectornode.discourse.api
 
+import com.exalate.api.domain.twintrace.INonPersistentTrace
 import customconnectornode.discourse.domain.Topic
 
 import java.sql.Timestamp
@@ -42,12 +43,9 @@ interface TopicAccessClient {
      * Update the topic as follows
      */
 
-    Topic update(Topic topic)
+    Map<String, Object> update(Topic topic, List<INonPersistentTrace> traces)
 
-    Void deleteTopic(String topicId)
-
-    void addPost(String topicId, String content)
+    String addPost(String topicId, String content)
 
     List<Topic> search(String query, Timestamp since)
 }
-

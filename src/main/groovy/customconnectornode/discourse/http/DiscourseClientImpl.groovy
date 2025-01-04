@@ -74,13 +74,13 @@ class DiscourseClientImpl implements DiscourseClient {
 
     private static void checkResponse(GroovyHttpRequest request, GroovyHttpResponse response) {
         log.debug("Response status: {}", response.code)
-        log.debug("Response headers: {}", response.headers)
+        log.debug("Response body: {} ...", response.bodyString.take(50))
 
         // Check if response code indicates an error (4xx or 5xx)
 
         if (response.code >= 400) {
-            log.debug("Got a failure response (${response.code}) due to ... while requesting ${request.method} ${request.uri}")
-            throw new DiscourseClientException("Got a failure response due to .... while requesting ${request.method} ${request.uri}")
+            log.debug("Got a failure response (${response.code}) due to ... while requesting ${request.method} ${request.url}")
+            throw new DiscourseClientException("Got a failure response due to .... while requesting ${request.method} ${request.url}")
         }
 
         if (!response.bodyString ) {

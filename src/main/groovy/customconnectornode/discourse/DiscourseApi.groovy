@@ -142,9 +142,9 @@ class DiscourseApi implements IIssueTrackerApi {
 
 
         log.debug("Writing entity with key: {}", entityKey)
-        Topic updatedTopic = topicAccessClient.update(changeTopic)
+        Map<String,Object> updatedResult = topicAccessClient.update(changeTopic, traces)
 
-        return new EntityWriteResult(TopicReplica.toReplica(updatedTopic), traces)
+        return new EntityWriteResult(TopicReplica.toReplica(updatedResult.topic as Topic), traces)
     }
 
 
@@ -157,10 +157,13 @@ class DiscourseApi implements IIssueTrackerApi {
 
         List<Topic> changedTopics = topicAccessClient.search(query, since?.toTimestamp())
 
+        log.debug("Search resulted in ${changedTopics.size()} entries")
+
         List<IIssueKey> issueKeyList = []
         changedTopics.each { Topic topic ->
             issueKeyList.add(TopicReplica.toEntityKey(topic))
         }
+
 
         // TODO: do proper pagination
         PageResponse<IIssueKey> response = new PageResponse<IIssueKey> (pageRequest, issueKeyList,true)

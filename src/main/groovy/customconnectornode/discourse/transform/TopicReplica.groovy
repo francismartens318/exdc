@@ -28,7 +28,10 @@ import com.exalate.api.domain.hubobject.v1_2.HubCustomFieldType
 import com.exalate.api.domain.hubobject.v1_2.IHubLabel
 import com.exalate.api.domain.hubobject.v1_2.IHubUser
 import com.exalate.api.domain.hubobject.v1_6.IHubCustomField
+import com.exalate.api.domain.twintrace.TraceAction
+import com.exalate.api.domain.twintrace.TraceType
 import com.exalate.basic.domain.BasicIssueKey
+import com.exalate.basic.domain.BasicNonPersistentTrace
 import com.exalate.basic.domain.hubobject.v1.BasicHubComment
 import com.exalate.basic.domain.hubobject.v1.BasicHubCustomField
 import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
@@ -42,7 +45,7 @@ import org.slf4j.LoggerFactory
 // convert a topic into a hub issue replica
 
 class TopicReplica {
-    private static final Logger logger = LoggerFactory.getLogger(TopicReplica.class)
+    private static final Logger log = LoggerFactory.getLogger(TopicReplica.class)
 
 
     private static IHubUser getHubUser(String display_username, String username, Long user_id) {
@@ -65,6 +68,16 @@ class TopicReplica {
         return icf
     }
 
+    static BasicNonPersistentTrace toCommentTrace(String localCommentId, String remoteCommentId) {
+        BasicNonPersistentTrace trace = new BasicNonPersistentTrace()
+                .setType(TraceType.COMMENT)
+                .setToSynchronize(true)
+                .setLocalId(localCommentId as String)
+                .setRemoteId(remoteCommentId as String)
+                .setAction(TraceAction.NONE)
+        return trace
+    }
+
     static void addCategory(BasicHubIssue replica, String category) {
         replica.customFields.put("category",
                 buildCustomField(1L, "Category", category, "Category section", HubCustomFieldType.STRING, category)
@@ -83,6 +96,7 @@ class TopicReplica {
         replica.labels = topic.tags.collect { String tag ->
                                                 IHubLabel label = new BasicHubLabel()
                                                 label.label = tag
+                                                return label
                                             }
 
 
@@ -134,8 +148,9 @@ class TopicReplica {
                         .created_at(Utils.getStringFromDate(comment.created))
                         .updated_at(Utils.getStringFromDate(comment.updated))
                         .raw(comment.body)
-                        .topic_id(basicHubIssue.key)
+                        .topic_id(basicHubIssue.key as String)
                         .display_username(comment.author.displayName)
+                        .remote_id(comment.remoteId as String)
                         .username(comment.author.username)
                         .build())
                 }
@@ -147,11 +162,11 @@ class TopicReplica {
 
         Topic topic = new Topic().builder()
                 .id(basicHubIssue.id as Long)
-                .topic_id(basicHubIssue.key)
-                .title(basicHubIssue.summary)
-                .raw(basicHubIssue.description)
-                .created_at(Utils.getStringFromDate(basicHubIssue.created))
-                .updated_at(Utils.getStringFromDate(basicHubIssue.updated))
+                .topic_id(basicHubIssue.key as String)
+                .title(basicHubIssue.summary as String)
+                .raw(basicHubIssue.description as String)
+                .created_at(Utils.getStringFromDate(basicHubIssue.created as Date))
+                .updated_at(Utils.getStringFromDate(basicHubIssue.updated as Date))
                 .category(basicHubIssue.customFields?.get("category")?.uid as String)
                 .category_id(basicHubIssue.customFields?.get("category")?.uid as Integer)
                 .tags(tagList)
@@ -163,6 +178,8 @@ class TopicReplica {
     }
 
     static  IIssueKey toEntityKey(Topic topic) {
-        return new BasicIssueKey(topic.id as String, topic.topic_id, "topic")
+        log.debug("Creating issue key for topic ${topic.id}")
+
+        return new BasicIssueKey(topic.id as String, topic.id as String, "topic")
     }
 }
