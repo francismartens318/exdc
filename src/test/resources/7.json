@@ -1,0 +1,870 @@
+{
+  "post_stream": {
+    "posts": [
+      {
+        "id": 8,
+        "name": "Francis Martens",
+        "username": "admin",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+        "created_at": "2024-12-23T11:28:09.995Z",
+        "cooked": "<p>This topic is to validate the test case</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "updated_at": "2024-12-23T11:28:09.995Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 2,
+        "readers_count": 1,
+        "score": 0,
+        "yours": true,
+        "topic_id": 7,
+        "topic_slug": "test-topic-to-check-the-test-cases",
+        "display_username": "Francis Martens",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 1,
+        "can_edit": true,
+        "can_delete": false,
+        "can_recover": true,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": true,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": false,
+        "admin": true,
+        "staff": true,
+        "user_id": 1,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": "2025-01-02T14:34:13.305Z",
+        "deleted_by": {
+          "id": 1,
+          "username": "admin",
+          "name": "Francis Martens",
+          "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png"
+        },
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      },
+      {
+        "id": 350,
+        "name": "Francis Martens",
+        "username": "admin",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+        "created_at": "2024-12-27T13:03:12.929Z",
+        "cooked": "<p>Test comment number 1</p>",
+        "post_number": 2,
+        "post_type": 1,
+        "updated_at": "2024-12-27T13:03:12.929Z",
+        "reply_count": 1,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 2,
+        "readers_count": 1,
+        "score": 0,
+        "yours": true,
+        "topic_id": 7,
+        "topic_slug": "test-topic-to-check-the-test-cases",
+        "display_username": "Francis Martens",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 1,
+        "can_edit": true,
+        "can_delete": true,
+        "can_recover": false,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": true,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": false,
+        "admin": true,
+        "staff": true,
+        "user_id": 1,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      },
+      {
+        "id": 351,
+        "name": "Francis Martens",
+        "username": "admin",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+        "created_at": "2024-12-27T13:03:21.239Z",
+        "cooked": "<p>Test comment number 2</p>",
+        "post_number": 3,
+        "post_type": 1,
+        "updated_at": "2024-12-27T13:03:21.239Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 2,
+        "readers_count": 1,
+        "score": 0,
+        "yours": true,
+        "topic_id": 7,
+        "topic_slug": "test-topic-to-check-the-test-cases",
+        "display_username": "Francis Martens",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 1,
+        "can_edit": true,
+        "can_delete": true,
+        "can_recover": false,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": true,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": false,
+        "admin": true,
+        "staff": true,
+        "user_id": 1,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      },
+      {
+        "id": 352,
+        "name": "Francis Martens",
+        "username": "admin",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+        "created_at": "2024-12-27T13:03:42.113Z",
+        "cooked": "<p>Test comment number 3 - reply to comment 1</p>",
+        "post_number": 4,
+        "post_type": 1,
+        "updated_at": "2024-12-27T13:03:42.113Z",
+        "reply_count": 1,
+        "reply_to_post_number": 2,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 2,
+        "readers_count": 1,
+        "score": 0,
+        "yours": true,
+        "topic_id": 7,
+        "topic_slug": "test-topic-to-check-the-test-cases",
+        "display_username": "Francis Martens",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 1,
+        "can_edit": true,
+        "can_delete": true,
+        "can_recover": false,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": true,
+        "user_title": null,
+        "reply_to_user": {
+          "username": "admin",
+          "name": "Francis Martens",
+          "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png"
+        },
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": false,
+        "admin": true,
+        "staff": true,
+        "user_id": 1,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      },
+      {
+        "id": 353,
+        "name": "Francis Martens - personal",
+        "username": "francis_personal",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/f/8e7dd6/{size}.png",
+        "created_at": "2024-12-27T13:21:55.295Z",
+        "cooked": "<p>Test comment number 4 - made by Francis Personal</p>",
+        "post_number": 5,
+        "post_type": 1,
+        "updated_at": "2024-12-27T13:22:22.536Z",
+        "reply_count": 0,
+        "reply_to_post_number": 4,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 2,
+        "readers_count": 1,
+        "score": 0,
+        "yours": false,
+        "topic_id": 7,
+        "topic_slug": "test-topic-to-check-the-test-cases",
+        "display_username": "Francis Martens - personal",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 1,
+        "can_edit": true,
+        "can_delete": true,
+        "can_recover": false,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": true,
+        "user_title": null,
+        "reply_to_user": {
+          "username": "admin",
+          "name": "Francis Martens",
+          "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png"
+        },
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 2,
+            "can_act": true
+          },
+          {
+            "id": 6,
+            "can_act": true
+          },
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 3,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "notice": {
+          "type": "new_user"
+        },
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      },
+      {
+        "id": 354,
+        "name": "Francis Martens - personal",
+        "username": "francis_personal",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/f/8e7dd6/{size}.png",
+        "created_at": "2024-12-27T13:22:43.939Z",
+        "cooked": "<p>Test comment number 5 - made by Francis Personal - updated by admin</p>",
+        "post_number": 6,
+        "post_type": 1,
+        "updated_at": "2024-12-27T13:23:06.421Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 2,
+        "readers_count": 1,
+        "score": 0,
+        "yours": false,
+        "topic_id": 7,
+        "topic_slug": "test-topic-to-check-the-test-cases",
+        "display_username": "Francis Martens - personal",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 2,
+        "can_edit": true,
+        "can_delete": true,
+        "can_recover": false,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": true,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 2,
+            "can_act": true
+          },
+          {
+            "id": 6,
+            "can_act": true
+          },
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 3,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      }
+    ],
+    "stream": [
+      8,
+      350,
+      351,
+      352,
+      353,
+      354
+    ]
+  },
+  "timeline_lookup": [
+    [
+      1,
+      11
+    ],
+    [
+      2,
+      7
+    ]
+  ],
+  "suggested_topics": [
+    {
+      "id": 310,
+      "title": "Create topic with comments from a hubIssue1735853606044",
+      "fancy_title": "Create topic with comments from a hubIssue1735853606044",
+      "slug": "create-topic-with-comments-from-a-hubissue1735853606044",
+      "posts_count": 15,
+      "reply_count": 0,
+      "highest_post_number": 15,
+      "image_url": null,
+      "created_at": "2025-01-02T21:33:26.765Z",
+      "last_posted_at": "2025-01-03T02:40:57.547Z",
+      "bumped": true,
+      "bumped_at": "2025-01-03T02:40:57.547Z",
+      "archetype": "regular",
+      "unseen": false,
+      "last_read_post_number": 11,
+      "unread": 0,
+      "new_posts": 4,
+      "unread_posts": 4,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "notification_level": 2,
+      "bookmarked": false,
+      "liked": false,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 1,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": 309,
+      "title": "Create topic with comments from a hubIssue1735853522639",
+      "fancy_title": "Create topic with comments from a hubIssue1735853522639",
+      "slug": "create-topic-with-comments-from-a-hubissue1735853522639",
+      "posts_count": 2,
+      "reply_count": 0,
+      "highest_post_number": 2,
+      "image_url": null,
+      "created_at": "2025-01-02T21:32:03.365Z",
+      "last_posted_at": "2025-01-02T21:32:04.821Z",
+      "bumped": true,
+      "bumped_at": "2025-01-02T21:32:04.821Z",
+      "archetype": "regular",
+      "unseen": true,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 0,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": 307,
+      "title": "Create topic with comments from a hubIssue1735853350600",
+      "fancy_title": "Create topic with comments from a hubIssue1735853350600",
+      "slug": "create-topic-with-comments-from-a-hubissue1735853350600",
+      "posts_count": 2,
+      "reply_count": 0,
+      "highest_post_number": 2,
+      "image_url": null,
+      "created_at": "2025-01-02T21:29:17.974Z",
+      "last_posted_at": "2025-01-02T21:30:07.997Z",
+      "bumped": true,
+      "bumped_at": "2025-01-02T21:30:07.997Z",
+      "archetype": "regular",
+      "unseen": true,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 0,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": 306,
+      "title": "Create topic with comments from a hubIssue1735852367540",
+      "fancy_title": "Create topic with comments from a hubIssue1735852367540",
+      "slug": "create-topic-with-comments-from-a-hubissue1735852367540",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2025-01-02T21:13:16.547Z",
+      "last_posted_at": "2025-01-02T21:13:16.686Z",
+      "bumped": true,
+      "bumped_at": "2025-01-02T21:13:16.686Z",
+      "archetype": "regular",
+      "unseen": true,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 0,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": 305,
+      "title": "Create topic with comments from a hubIssue1735852110821",
+      "fancy_title": "Create topic with comments from a hubIssue1735852110821",
+      "slug": "create-topic-with-comments-from-a-hubissue1735852110821",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2025-01-02T21:08:31.464Z",
+      "last_posted_at": "2025-01-02T21:08:31.585Z",
+      "bumped": true,
+      "bumped_at": "2025-01-02T21:08:31.585Z",
+      "archetype": "regular",
+      "unseen": true,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 0,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    }
+  ],
+  "tags": [
+    "testcase",
+    "spock"
+  ],
+  "tags_descriptions": {},
+  "id": 7,
+  "title": "Test Topic to check the test cases",
+  "fancy_title": "Test Topic to check the test cases",
+  "posts_count": 5,
+  "created_at": "2024-12-23T11:28:09.802Z",
+  "views": 4,
+  "reply_count": 2,
+  "like_count": 0,
+  "last_posted_at": "2024-12-27T13:22:43.939Z",
+  "visible": true,
+  "closed": false,
+  "archived": false,
+  "has_summary": false,
+  "archetype": "regular",
+  "slug": "test-topic-to-check-the-test-cases",
+  "category_id": 4,
+  "word_count": 35,
+  "deleted_at": "2025-01-02T14:34:13.364Z",
+  "user_id": 1,
+  "featured_link": null,
+  "pinned_globally": false,
+  "pinned_at": null,
+  "pinned_until": null,
+  "image_url": null,
+  "slow_mode_seconds": 0,
+  "draft": null,
+  "draft_key": "topic_7",
+  "draft_sequence": 10,
+  "posted": true,
+  "unpinned": null,
+  "pinned": false,
+  "current_post_number": 1,
+  "highest_post_number": 6,
+  "last_read_post_number": 6,
+  "last_read_post_id": 354,
+  "deleted_by": {
+    "id": 1,
+    "username": "admin",
+    "name": "Francis Martens",
+    "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png"
+  },
+  "has_deleted": false,
+  "actions_summary": [
+    {
+      "id": 4,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 8,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 10,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 7,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    }
+  ],
+  "chunk_size": 20,
+  "bookmarked": false,
+  "topic_timer": null,
+  "message_bus_last_id": 15,
+  "participant_count": 2,
+  "show_read_indicator": false,
+  "thumbnails": null,
+  "slow_mode_enabled_until": null,
+  "details": {
+    "can_edit": true,
+    "notification_level": 3,
+    "notifications_reason_id": 1,
+    "can_move_posts": true,
+    "can_recover": true,
+    "can_remove_allowed_users": true,
+    "can_invite_to": true,
+    "can_invite_via_email": true,
+    "can_reply_as_new_topic": true,
+    "can_flag_topic": true,
+    "can_review_topic": true,
+    "can_close_topic": true,
+    "can_archive_topic": true,
+    "can_split_merge_topic": true,
+    "can_edit_staff_notes": true,
+    "can_toggle_topic_visibility": true,
+    "can_pin_unpin_topic": true,
+    "can_moderate_category": true,
+    "can_remove_self_id": 1,
+    "participants": [
+      {
+        "id": 1,
+        "username": "admin",
+        "name": "Francis Martens",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+        "post_count": 3,
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_color": null,
+        "flair_bg_color": null,
+        "flair_group_id": null,
+        "admin": true,
+        "trust_level": 1
+      },
+      {
+        "id": 3,
+        "username": "francis_personal",
+        "name": "Francis Martens - personal",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/f/8e7dd6/{size}.png",
+        "post_count": 2,
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_color": null,
+        "flair_bg_color": null,
+        "flair_group_id": null,
+        "trust_level": 1
+      }
+    ],
+    "created_by": {
+      "id": 1,
+      "username": "admin",
+      "name": "Francis Martens",
+      "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png"
+    },
+    "last_poster": {
+      "id": 3,
+      "username": "francis_personal",
+      "name": "Francis Martens - personal",
+      "avatar_template": "/letter_avatar_proxy/v4/letter/f/8e7dd6/{size}.png"
+    }
+  },
+  "bookmarks": []
+}

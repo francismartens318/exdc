@@ -21,21 +21,31 @@
  *
  */
 
-package customconnectornode.discourse.config
+package customconnectornode.discourse.api
 
-import customconnectornode.discourse.api.TopicAccessClient
-import customconnectornode.discourse.http.TopicAccessClientImpl
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import com.exalate.api.domain.twintrace.INonPersistentTrace
+import customconnectornode.discourse.domain.Topic
 
-@Configuration
-class DiscourseConfig {
-    @Bean
-    TopicAccessClient discourseClient(
-            @Value('${discourse.base-url}') String baseUrl,
-            @Value('${discourse.api-key}') String apiKey,
-            @Value('${discourse.api-userName}') String apiUserName) {
-        new TopicAccessClientImpl(baseUrl, apiKey, apiUserName)
-    }
+import java.sql.Timestamp
+
+
+// TODO document the interface
+
+interface TopicAccessClient {
+    Topic getTopic(String topicId)
+
+    /*
+    *   Create the topic using the title, raw and category
+     */
+    Topic create(Topic topic)
+
+    /*
+     * Update the topic as follows
+     */
+
+    Map<String, Object> update(Topic topic, List<INonPersistentTrace> traces)
+
+    String addPost(String topicId, String content)
+
+    List<Topic> search(String query, Timestamp since)
 }

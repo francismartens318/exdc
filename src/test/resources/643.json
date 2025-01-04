@@ -1,0 +1,74 @@
+{
+  "id": 643,
+  "name": "Exalate Bot",
+  "username": "xl8bot",
+  "avatar_template": "/letter_avatar_proxy/v4/letter/x/b77776/{size}.png",
+  "created_at": "2025-01-04T09:49:39.005Z",
+  "cooked": "<p>This is a test comment number 2 1735984052015</p>",
+  "post_number": 4,
+  "post_type": 1,
+  "updated_at": "2025-01-04T09:49:39.005Z",
+  "reply_count": 0,
+  "reply_to_post_number": null,
+  "quote_count": 0,
+  "incoming_link_count": 0,
+  "reads": 0,
+  "readers_count": 0,
+  "score": 0,
+  "yours": true,
+  "topic_id": 313,
+  "topic_slug": "create-topic-with-comments-from-a-hubissue1735982009292",
+  "display_username": "Exalate Bot",
+  "primary_group_name": null,
+  "flair_name": null,
+  "flair_url": null,
+  "flair_bg_color": null,
+  "flair_color": null,
+  "flair_group_id": null,
+  "version": 1,
+  "can_edit": true,
+  "can_delete": true,
+  "can_recover": false,
+  "can_see_hidden_post": true,
+  "can_wiki": true,
+  "user_title": null,
+  "bookmarked": false,
+  "raw": "This is a test comment number 2 1735984052015",
+  "actions_summary": [
+    {
+      "id": 3,
+      "can_act": true
+    },
+    {
+      "id": 4,
+      "can_act": true
+    },
+    {
+      "id": 8,
+      "can_act": true
+    },
+    {
+      "id": 10,
+      "can_act": true
+    },
+    {
+      "id": 7,
+      "can_act": true
+    }
+  ],
+  "moderator": true,
+  "admin": false,
+  "staff": true,
+  "user_id": 2,
+  "draft_sequence": 0,
+  "hidden": false,
+  "trust_level": 4,
+  "deleted_at": null,
+  "user_deleted": false,
+  "edit_reason": null,
+  "can_view_edit_history": true,
+  "wiki": false,
+  "reviewable_id": null,
+  "reviewable_score_count": 0,
+  "reviewable_score_pending_count": 0
+}

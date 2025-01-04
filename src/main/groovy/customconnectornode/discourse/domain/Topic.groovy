@@ -1,105 +1,199 @@
+/*
+ * Copyright (c) 2024 Exalate (https://exalate.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package customconnectornode.discourse.domain
 
+import com.fasterxml.jackson.annotation.JsonAnySetter
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.CompileStatic
 import groovy.transform.builder.Builder
+import groovy.util.logging.Slf4j
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 @CompileStatic
 @Builder
 class Topic {
-    Long id
-    String title
-    String fancy_title
-    String raw
+    private static final Logger log = LoggerFactory.getLogger(Topic.class)
+
+    List actions_summary
+    Boolean admin
+    Boolean archived
+    String archetype
+    String avatar_template
+    List bookmarks
+    Boolean bookmarked
+    Boolean can_delete
+    Boolean can_edit
+    Boolean can_recover
+    Boolean can_see_hidden_post
+    Boolean can_view_edit_history
+    Boolean can_vote
+    Boolean can_wiki
     String category
     Integer category_id
-    String last_posted_at
-    String created_at
-    String deleted_at
-    Integer posts_count
-    Integer views
-    Integer reply_count
-    Integer like_count
-    Integer word_count
-    List<String> tags
-    Map<String, String> tags_descriptions
-    Boolean visible
+    Integer chunk_size
     Boolean closed
-    Boolean archived
-    Boolean has_summary
-    String slug
-
-    // Stream and lookup
-    Map post_stream
-    List<Post> posts
-    List timeline_lookup
-    List suggested_topics
-
-    // Additional fields from the response
-    String archetype
-    Integer user_id
-    String featured_link
-    Boolean pinned_globally
-    String pinned_at
-    String pinned_until
-    String image_url
-    Integer slow_mode_seconds
+    String cooked
+    String created_at
+    Integer current_post_number
+    String deleted_at
+    Map details
+    String display_username
+    String discourse_zendesk_plugin_zendesk_id
+    String discourse_zendesk_plugin_zendesk_url
     String draft
     String draft_key
     Integer draft_sequence
-    Boolean posted
-    String unpinned
-    Boolean pinned
-    Integer current_post_number
-    Integer highest_post_number
-    Integer last_read_post_number
-    Integer last_read_post_id
-    String deleted_by
+    String edit_reason
+    String fancy_title
+    String featured_link
+    String flair_bg_color
+    String flair_color
+    Integer flair_group_id
+    String flair_name
+    String flair_url
     Boolean has_deleted
-    List actions_summary
-    Integer chunk_size
-    Boolean bookmarked
-    String topic_timer
+    Boolean has_summary
+    Boolean hidden
+    Integer highest_post_number
+    Long id
+    String image_url
+    Integer incoming_link_count
+    Integer last_read_post_id
+    Integer last_read_post_number
+    String last_posted_at
+    Integer like_count
     Integer message_bus_last_id
+    Boolean moderator
+    String name
     Integer participant_count
-    Integer queued_posts_count
-    Boolean show_read_indicator
-    String thumbnails
-    String slow_mode_enabled_until
-    List related_topics
-    Boolean summarizable
-    List valid_reactions
-    Boolean can_vote
-    Integer vote_count
-    Boolean user_voted
-    String discourse_zendesk_plugin_zendesk_id
-    String discourse_zendesk_plugin_zendesk_url
-    Map details
     List pending_posts
-    List bookmarks
+    Boolean pinned
+    Boolean pinned_globally
+    String pinned_at
+    String pinned_until
+    List<Post> posts
+    Integer post_number
+    Integer posts_count
+    Map post_stream
+    Boolean posted
+    Integer post_type
+    String primary_group_name
+    Integer queued_posts_count
+    Integer quote_count
+    String raw
+    Integer readers_count
+    Integer reads
+    List related_topics
+    Integer reply_count
+    Integer reply_to_post_number
+    Integer score
+    String slow_mode_enabled_until
+    Integer slow_mode_seconds
+    String slug
+    Boolean show_read_indicator
+    Boolean staff
+    List suggested_topics
+    Boolean summarizable
+    List<String> tags
+    Map<String, String> tags_descriptions
+    String thumbnails
+    List timeline_lookup
+    String title
+    String topic_id
+    String topic_timer
+    String topic_slug
+    Integer trust_level
+    String unpinned
+    String updated_at
+    Integer user_id
+    Boolean user_deleted
+    Boolean user_voted
+    String user_title
+    String username
+    List valid_reactions
+    Integer version
+    Integer views
+    Boolean visible
+    Boolean wiki
+    Integer vote_count
+    Integer word_count
+    Boolean yours
+    String origin_url // not a field in the json
+
+    @JsonAnySetter
+    Map<String, Object> unknownFields = new HashMap<>()
+
 
     @Override
     String toString() {
-        return "Topic(id: $id, title: $title, category_id: $category_id)"
+        return "Topic(id: $id, title: $title, category_id: $category_id ...)"
     }
 
+    static Topic fromJson(Map topicData, String sourceUrl = null) {
+        ObjectMapper mapper = new ObjectMapper()
+        Topic topic = mapper.convertValue(topicData, Topic.class)
 
-    void mapPosts() {
-        if (post_stream && post_stream.posts) {
-            posts = post_stream.posts.collect { postData ->
-                Post.builder()
-                        .id(postData['id'] as Long)
-                        .topic_id(id)
-                        .name(postData['name'] as String)
-                        .username(postData['username'] as String)
-                        .created_at(postData['created_at'] as String)
-                        .updated_at(postData['updated_at'] as String)
-                        .cooked(postData['cooked'] as String)
-                        .raw(postData['raw'] as String)
-                        .post_number(postData['post_number'] as Integer)
-                        .build()
+        // convert post_stream.posts to List<Post>
+        if (topic.post_stream && topic.post_stream.posts) {
+            topic.posts = topic.post_stream.posts.collect { postData ->
+                return Post.fromJson(postData as Map)
             }
         }
+        // add the topic_origin_url to the topic
+        topic.origin_url = sourceUrl
+
+        return topic
     }
+
+    Post firstPost() {
+        return posts.find { it.post_number == 1 }
+    }
+
+    String getTopic_id() {
+        return topic_id ?: posts?.first()?.topic_id
+    }
+
+    String getCooked() {
+        // the cooked is calculated from the first post
+        return  posts?.first()?.cooked
+    }
+
+    String getRaw() {
+        //  the raw is calculated from the first post, given that the raw on the topic which can contain the summary of the topic.
+        return posts?.first()?.raw ?: raw
+    }
+
+    Integer getCategory_id() {
+        return category_id
+    }
+
+
+
+
+
+
 
 
 }

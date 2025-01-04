@@ -21,21 +21,38 @@
  *
  */
 
-package customconnectornode.discourse.config
+package customconnectornode.discourse.transform
 
-import customconnectornode.discourse.api.TopicAccessClient
-import customconnectornode.discourse.http.TopicAccessClientImpl
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-@Configuration
-class DiscourseConfig {
-    @Bean
-    TopicAccessClient discourseClient(
-            @Value('${discourse.base-url}') String baseUrl,
-            @Value('${discourse.api-key}') String apiKey,
-            @Value('${discourse.api-userName}') String apiUserName) {
-        new TopicAccessClientImpl(baseUrl, apiKey, apiUserName)
+import java.text.SimpleDateFormat
+
+class Utils {
+    private static final Logger logger = LoggerFactory.getLogger(Utils.class)
+    private static final datePattern = "yyyy-MM-dd'T'HH:mm:ss.SSS"
+
+    static Date getDateFromString(String dateString) {
+        try {
+                if (!dateString) {
+                    return null
+                }
+
+                def formatter = new SimpleDateFormat(datePattern)
+                formatter.setTimeZone(TimeZone.getTimeZone("UTC"))
+                return formatter.parse(dateString)
+            }
+        catch (Exception e) {
+                logger.error("Error parsing date string: ${dateString}", e)
+                return null
+            }
+
+    }
+
+    static String getStringFromDate(Date date) {
+        if (!date) return null
+
+        SimpleDateFormat formatter = new SimpleDateFormat(datePattern)
+        return formatter.format(date)
     }
 }
