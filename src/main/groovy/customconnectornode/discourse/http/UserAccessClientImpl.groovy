@@ -43,7 +43,6 @@ class UserAccessClientImpl implements UserAccessClient {
 
         Map emailJson = discourseClient.get("/users/${userId}/emails.json")
         if (!emailJson || !emailJson.containsKey("email")) {
-
             throw new DiscourseClientException("Request for User with ${userId} didn't result in a parseable user")
         }
         return User.fromJson(userJson.get("user"), emailJson.get("email"))

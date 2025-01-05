@@ -1,50 +1,52 @@
 plugins {
     id 'java'
     id 'groovy'
-    id 'org.jetbrains.kotlin.jvm' version '1.9.20' // Update to latest version
+    id 'org.jetbrains.kotlin.jvm' version '1.9.20'
+}
 
+kotlin {
+    jvmToolchain(17)
 }
 
 configurations.configureEach {
     resolutionStrategy {
-        force 'org.apache.groovy:groovy:4.0.5'
         force 'org.apache.groovy:groovy-test:4.0.5'
         force 'org.apache.groovy:groovy-json:4.0.5'
-        // Add other modules if needed
+        force 'org.apache.groovy:groovy-datetime:4.0.5'
+        force 'org.apache.groovy:groovy-xml:4.0.5'
+        force 'org.apache.groovy:groovy-templates:4.0.5'
     }
 }
 
 allprojects {
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.compilerArgs += ['-Xlint:deprecation']
     }
 }
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.grails.org/grails/core' } // Add Grails Core repository for Groovy artifacts
+    maven { url 'https://repo.grails.org/grails/core' }
 }
 
 dependencies {
+    // Keep existing dependencies as they are well-configured
     implementation fileTree(dir: 'lib', include: ['*.jar'])
     implementation 'org.apache.groovy:groovy-all:4.0.5'
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
-
     implementation 'org.springframework:spring-context:6.1.14'
     implementation 'org.springframework:spring-webflux:6.1.14'
     implementation 'io.github.cdimascio:java-dotenv:5.2.2'
 
-
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.apache.groovy:groovy-test:4.0.5'
-    testImplementation 'org.spockframework:spock-core:2.4-M4-groovy-4.0'
+    testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+
     testImplementation 'org.mockito:mockito-core:4.11.0'
-
-
     testImplementation 'org.objenesis:objenesis:3.3'
-
-
     testImplementation 'net.bytebuddy:byte-buddy:1.14.9'
+    testImplementation 'org.apache.groovy:groovy:4.0.5'
+    testImplementation 'org.apache.groovy:groovy-test-junit5:4.0.5'
 }
 
 test {
