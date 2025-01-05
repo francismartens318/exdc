@@ -31,21 +31,55 @@ import java.sql.Timestamp
 
 // TODO document the interface
 
+/*
+ * Interface for managing and interacting with topics.
+ * Provides functionality to create, retrieve, update, search,
+ * and add content (posts) to topics in a topic management system.
+ */
 interface TopicAccessClient {
-    Topic getTopic(String topicId)
 
-    /*
-    *   Create the topic using the title, raw and category
+    /**
+     * Retrieves the details of a topic based on its unique identifier.
+     *
+     * @param topicId the unique ID of the topic to retrieve.
+     * @return the topic object containing its details.
      */
-    Topic create(Topic topic)
+    Topic getTopic(String topicId);
 
-    /*
-     * Update the topic as follows
+    /**
+     * Creates a new topic using the provided details (e.g., title, content, and category).
+     *
+     * @param topic the topic object containing the necessary data for creation.
+     * @return the newly created topic object.
      */
+    Topic create(Topic topic);
 
-    Map<String, Object> update(Topic topic, List<INonPersistentTrace> traces)
+    /**
+     * Updates an existing topic with new information (e.g., modified content or metadata).
+     * Non-persistent traces can optionally be included to monitor changes during the update process.
+     *
+     * @param topic the topic object containing the updated data.
+     * @param traces a list of non-persistent trace objects to track update changes.
+     * @return a map containing the results or status of the update operation.
+     */
+    Map<String, Object> update(Topic topic, List<INonPersistentTrace> traces);
 
-    String addPost(String topicId, String content)
+    /**
+     * Adds a new post or comment to an existing topic.
+     *
+     * @param topicId the unique identifier of the topic to add the post to.
+     * @param content the content of the post to be added.
+     * @return a response or confirmation indicating the result of the post addition.
+     */
+    String addPost(String topicId, String content);
 
-    List<Topic> search(String query, Timestamp since)
+    /**
+     * Searches for topics based on a query string and an optional time filter.
+     * The time filter allows narrowing down results to topics created or updated after the specified timestamp.
+     *
+     * @param query the query string used to filter topics by content or title.
+     * @param since a timestamp to filter topics created/updated after this time (optional).
+     * @return a list of topics that match the search criteria.
+     */
+    List<Topic> search(String query, Timestamp since);
 }

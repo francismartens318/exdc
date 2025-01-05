@@ -32,118 +32,177 @@ import groovy.json.JsonSlurper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-/*
-** TODO - Make it Async
+
+
+/**
+ * `DiscourseClientImpl` is an implementation of the `DiscourseClient` interface responsible
+ * for interacting with a Discourse API. This class handles HTTP requests (GET, POST, PUT)
+ * to the Discourse server and processes responses.
+ *
+ * Responsibilities include:
+ * - Constructing API requests with appropriate headers and parameters
+ * - Sending requests through a `GroovyHttpClient`
+ * - Parsing responses and handling errors
+ * - Centralizing the configuration for Discourse API connection (e.g., base URL, API key, etc.)
  */
-
 class DiscourseClientImpl implements DiscourseClient {
-    private static final Logger log = LoggerFactory.getLogger(DiscourseClientImpl.class)
 
+    private static final Logger log = LoggerFactory.getLogger(DiscourseClientImpl.class); // Logger for recording debug information
 
+    private final GroovyHttpClient groovyHttpClient; // HTTP client for making requests
+    private final String baseUrl;  // Base URL of the Discourse server
+    private final String apiKey;   // API key for authenticating Discourse requests
+    private final String apiUsername; // Username for authentication
+    private final JsonSlurper jsonSlurper = new JsonSlurper(); // JSON parser for processing responses
 
-    private final GroovyHttpClient groovyHttpClient
-    private final String baseUrl
-    private final String apiKey
-    private final String apiUsername
-    private final JsonSlurper jsonSlurper = new JsonSlurper()
-
-
+    /**
+     * Fetches a configuration parameter either from JVM system properties or environment variables, allowing for flexibility in configuration.
+     *
+     * @param key The name of the parameter to fetch.
+     * @return The value of the parameter or null if not defined.
+     */
     private static String getParameter(String key) {
-        return System.getProperty(key) ?: System.getenv(key)
+        return System.getProperty(key) ?: System.getenv(key);
     }
 
-   DiscourseClientImpl(GroovyHttpClient ghc) {
-       this.baseUrl = getParameter("TRACKER_URL")
-       this.apiKey = getParameter("TRACKER_API_KEY")
-       this.apiUsername = getParameter("TRACKER_USER")
+    /**
+     * Constructor for initializing the Discourse client. Reads essential configuration values
+     * (base URL, API key, username) from system properties or environment variables.
+     *
+     * @param ghc The `GroovyHttpClient` instance used to perform HTTP requests, and which is delivered by the application.
+     */
+    DiscourseClientImpl(GroovyHttpClient ghc) {
+        this.baseUrl = getParameter("TRACKER_URL");
+        this.apiKey = getParameter("TRACKER_API_KEY");
+        this.apiUsername = getParameter("TRACKER_USER");
+        this.groovyHttpClient = ghc;
 
-       this.groovyHttpClient = ghc
-
-       log.debug("DiscourseClientImpl created with baseUrl: ${baseUrl}, apiKey: ${apiKey}.take(3), apiUsername: ${apiUsername}")
+        log.debug("DiscourseClientImpl created with baseUrl: ${baseUrl}, apiKey: ${apiKey.take(3)}, apiUsername: ${apiUsername}");
     }
 
-
-
+    /**
+     * Logs debug details for an outgoing HTTP request.
+     *
+     * @param request The HTTP request being sent.
+     */
     private static void logRequest(GroovyHttpRequest request) {
-        log.debug("Request: {} {}", request.method, request.url)
+        log.debug("Request: {} {}", request.method, request.url);
     }
 
+    /**
+     * Validates an HTTP response. Logs response details such as status and body.
+     * Throws an exception if the response indicates an error (4xx or 5xx) or if
+     * the response body is empty.
+     *
+     * @param request  The HTTP request that triggered the response.
+     * @param response The HTTP response to validate.
+     * @throws DiscourseClientException if an error occurs in the response.
+     */
     private static void checkResponse(GroovyHttpRequest request, GroovyHttpResponse response) {
-        log.debug("Response status: {}", response.code)
-        log.debug("Response body: {} ...", response.bodyString.take(50))
+        log.debug("Response status: {}", response.code);
+        log.debug("Response body: {} ...", response.bodyString.take(50));
 
-        // Check if response code indicates an error (4xx or 5xx)
-
+        // Check for HTTP error codes
         if (response.code >= 400) {
-            log.debug("Got a failure response (${response.code}) due to ... while requesting ${request.method} ${request.url}")
-            throw new DiscourseClientException("Got a failure response due to .... while requesting ${request.method} ${request.url}")
+            log.debug("Got a failure response (${response.code}) while requesting ${request.method} ${request.url}");
+            throw new DiscourseClientException("Error ${response.code} for ${request.method} ${request.url}");
         }
 
-        if (!response.bodyString ) {
-            log.debug("Response bodyString is empty")
-            throw new DiscourseClientException("Response bodyString is empty")
+        // Validate response body
+        if (!response.bodyString) {
+            log.debug("Response bodyString is empty");
+            throw new DiscourseClientException("Response bodyString is empty");
         }
-
     }
 
-
+    /**
+     * Constructs a complete URI based on the given path and query parameters.  The URL is constructed in a safe way.
+     *
+     * @param path   The API path to append to the base URL (e.g., `/topics`).
+     * @param params Optional query parameters to include in the URI.
+     * @return The fully constructed URI as a string.
+     */
     String buildUri(String path, Map<String, List<String>> params = [:]) {
-            def uri = new StringBuilder(baseUrl)
-            if (!path.startsWith('/')) {
-                uri.append('/')
-            }
-            uri.append(path)
+        def uri = new StringBuilder(baseUrl);
+        if (!path.startsWith('/')) {
+            uri.append('/');
+        }
+        uri.append(path);
 
-            if (params) {
-                uri.append('?')
-                uri.append(params.collect { key, value ->
-                    "${URLEncoder.encode(key.toString(), 'UTF-8')}=${URLEncoder.encode(value.toString(), 'UTF-8')}"
-                }.join('&'))
-            }
-
-            return uri.toString()
+        if (params) {
+            uri.append('?');
+            uri.append(params.collect { key, value ->
+                "${URLEncoder.encode(key.toString(), 'UTF-8')}=${URLEncoder.encode(value.toString(), 'UTF-8')}"
+            }.join('&'));
         }
 
-    private Map<String, List<String>> getHeaders() {
-        Map<String, List<String>> headers = new HashMap<>()
-
-
-        headers.put('Api-Key',  [ apiKey ] )
-        headers.put('Api-Username', [ apiUsername ])
-        headers.put('Content-Type', [ 'application/json' ])
-        headers.put('Accept', [ 'application/json' ])
-        return headers
+        return uri.toString();
     }
 
+    /**
+     * Constructs request headers for Discourse API requests.
+     * Adds authentication headers and standard header fields for JSON communication.
+     *
+     * @return A map of headers where keys are header names and values are lists of header values.
+     */
+    private Map<String, List<String>> getHeaders() {
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put('Api-Key', [apiKey]);
+        headers.put('Api-Username', [apiUsername]);
+        headers.put('Content-Type', ['application/json']);
+        headers.put('Accept', ['application/json']);
+        return headers;
+    }
+
+    /**
+     * Sends a GET request to the specified Discourse API endpoint and retrieves a parsed JSON
+     * response.
+     *
+     * @param path   The API endpoint path (e.g., `/users`).
+     * @param params Optional query parameters.
+     * @return A map containing the parsed JSON response.
+     */
     @Override
     Map get(String path, Map<String, List<String>> params = [:]) {
-
-        GroovyHttpRequest request = new GroovyHttpRequest("GET", buildUri(path, params), null, params, getHeaders())
-        GroovyHttpResponse response = groovyHttpClient.http(request)
-        checkResponse(request, response)
-
-        return response?.bodyString ? jsonSlurper.parseText(response.bodyString) as Map : null
+        GroovyHttpRequest request = new GroovyHttpRequest("GET", buildUri(path, params), null, params, getHeaders());
+        GroovyHttpResponse response = groovyHttpClient.http(request);
+        checkResponse(request, response);
+        return response?.bodyString ? jsonSlurper.parseText(response.bodyString) as Map : null;
     }
 
+    /**
+     * Sends a POST request with a JSON body to the specified Discourse API endpoint.
+     *
+     * @param path   The API endpoint path.
+     * @param body   The body of the POST request (serialized to JSON).
+     * @param params Optional query parameters.
+     * @return A map containing the parsed JSON response.
+     */
     @Override
     Map post(String path, Object body, Map<String, List<String>> params = [:]) {
-        String jsonBody = new JsonBuilder(body).toString()
-        GroovyHttpRequest request = new GroovyHttpRequest("POST", buildUri(path, params), jsonBody, params, getHeaders())
-        logRequest(request)
-
-        GroovyHttpResponse response = groovyHttpClient.http(request)
-        checkResponse(request, response)
-        return jsonSlurper.parseText(response.bodyString) as Map
+        String jsonBody = new JsonBuilder(body).toString();
+        GroovyHttpRequest request = new GroovyHttpRequest("POST", buildUri(path, params), jsonBody, params, getHeaders());
+        logRequest(request);
+        GroovyHttpResponse response = groovyHttpClient.http(request);
+        checkResponse(request, response);
+        return jsonSlurper.parseText(response.bodyString) as Map;
     }
 
-
+    /**
+     * Sends a PUT request with a JSON body to the specified Discourse API endpoint.
+     *
+     * @param path   The API endpoint path.
+     * @param body   The body of the PUT request (serialized to JSON).
+     * @param params Optional query parameters.
+     * @return A map containing the parsed JSON response.
+     */
     @Override
     Map doPut(String path, Object body, Map<String, List<String>> params = [:]) {
-        String jsonBody = new JsonBuilder(body).toString()
-        GroovyHttpRequest request = new GroovyHttpRequest("PUT", buildUri(path, params), jsonBody, params, getHeaders())
-        logRequest(request)
-        GroovyHttpResponse response = groovyHttpClient.http(request)
-        checkResponse(request, response)
-        return jsonSlurper.parseText(response.bodyString) as Map
+        String jsonBody = new JsonBuilder(body).toString();
+        GroovyHttpRequest request = new GroovyHttpRequest("PUT", buildUri(path, params), jsonBody, params, getHeaders());
+        logRequest(request);
+        GroovyHttpResponse response = groovyHttpClient.http(request);
+        checkResponse(request, response);
+        return jsonSlurper.parseText(response.bodyString) as Map;
     }
 }

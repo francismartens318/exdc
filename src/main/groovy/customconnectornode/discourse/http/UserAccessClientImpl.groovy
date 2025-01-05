@@ -27,24 +27,47 @@ import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.UserAccessClient
 import customconnectornode.discourse.domain.User
 
+/**
+ * Implementation of the UserAccessClient interface providing access to user information.
+ * This class interacts with a Discourse platform to retrieve user details.
+ * It delegates HTTP requests to a provided DiscourseClient instance.
+ */
 class UserAccessClientImpl implements UserAccessClient {
-    private final DiscourseClient discourseClient
 
+    // A client used to interact with the Discourse API for making HTTP requests.
+    private final DiscourseClient discourseClient;
+
+    /**
+     * Constructor to initialize the UserAccessClientImpl with the required DiscourseClient.
+     *
+     * @param discourseClient The client responsible for communicating with the Discourse API.
+     */
     UserAccessClientImpl(DiscourseClient discourseClient) {
-        this.discourseClient = discourseClient
+        this.discourseClient = discourseClient;
     }
 
+    /**
+     * Retrieves a user's information, including details and email, from the Discourse platform.
+     *
+     * @param userId The unique identifier of the user to retrieve information for.
+     * @return A User object containing user details and email information.
+     * @throws DiscourseClientException if the requested user data or email cannot be retrieved or parsed.
+     */
     @Override
     User getUser(String userId) {
-        Map userJson = discourseClient.get("/u/${userId}.json")
+        // Fetch the user details in JSON format from the Discourse API.
+        Map userJson = discourseClient.get("/u/${userId}.json");
         if (!userJson || !userJson.containsKey("user")) {
-            throw new DiscourseClientException("Request for User with ${userId} didn't result in a parseable user")
+            throw new DiscourseClientException("Request for User with ${userId} didn't result in a parseable user");
         }
 
-        Map emailJson = discourseClient.get("/users/${userId}/emails.json")
+        // Fetch the user's email details in JSON format from the Discourse API.  Note that the user
+        Map emailJson = discourseClient.get("/users/${userId}/emails.json");
         if (!emailJson || !emailJson.containsKey("email")) {
-            throw new DiscourseClientException("Request for User with ${userId} didn't result in a parseable user")
+            throw new DiscourseClientException("Request for User with ${userId} didn't result in a parseable information structure.  Is the proper authentication used to retrieve email information?");
         }
-        return User.fromJson(userJson.get("user"), emailJson.get("email"))
+
+        // Create a User object using the fetched user details and email information.
+        return User.fromJson(userJson.get("user"), emailJson.get("email"));
     }
 }

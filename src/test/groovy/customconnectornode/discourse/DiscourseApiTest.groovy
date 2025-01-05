@@ -144,6 +144,26 @@ class DiscourseApiTest extends Specification {
 
     }
 
+    def "readEntity returns null for a non-existent topic"() {
+        given:
+        BasicIssueKey entityKey = new BasicIssueKey("", "10000000", "topic")
+        def jsonString = ""
+        def mockResponse = new GroovyHttpResponse(
+                404,
+                [:],
+                { -> jsonString } as Supplier<String>,
+                { -> jsonString } as Supplier<Object>
+        )
+
+        groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
+
+        when:
+        IHubIssueReplica result = discourseApi.readEntity(entityKey)
+
+        then:
+        !result
+    }
+
     def "doesEntityExist returns false when asked for a non-existent topic"() {
         given:
 
@@ -159,7 +179,7 @@ class DiscourseApiTest extends Specification {
         groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
 
         when:
-            Boolean result = discourseApi.doesEntityExist(entityKey)
+        Boolean result = discourseApi.doesEntityExist(entityKey)
 
         then:
             result == false

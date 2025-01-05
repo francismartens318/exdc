@@ -28,7 +28,6 @@ import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.TopicAccessClient
 import customconnectornode.discourse.domain.Topic
 import customconnectornode.discourse.transform.TopicReplica
-import org.apache.hc.client5.http.classic.methods.HttpDelete
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -40,23 +39,36 @@ class TopicAccessClientImpl implements TopicAccessClient {
 
     private DiscourseClient discourseClient
 
+    // Constructor to initialize the client with the DiscourseClient dependency.
     TopicAccessClientImpl(DiscourseClient dc) {
         this.discourseClient = dc
     }
 
-
-
+    /**
+     * Fetches a specific topic by its unique identifier.
+     *
+     * @param topicId The ID of the topic to be fetched.
+     * @return A Topic object containing the topic's data, or null if the topic is not found or the response is empty.
+     */
     @Override
     Topic getTopic(String topicId) {
+        Map resultJson = null
         String topicUrl = "/t/${topicId}.json"
-
-
-        Map resultJson = discourseClient.get(topicUrl, [:])
+        try {
+            resultJson = discourseClient.get(topicUrl, [:])
+        } catch (DiscourseClientException e) {
+            log.debug("Getting topic ${topicId} failed with error ${e.message}, returning null")
+            return null
+        }
         return resultJson ? Topic.fromJson(resultJson, discourseClient.buildUri(topicUrl, [:])) : null
     }
 
-
-
+    /**
+     * Creates a new topic in Discourse.
+     *
+     * @param topic A Topic object containing the details of the topic to be created.
+     * @return The created Topic object.
+     */
     Topic create(Topic topic) {
         Map createJson = [
                 title: topic.title,
@@ -65,17 +77,19 @@ class TopicAccessClientImpl implements TopicAccessClient {
         ]
 
         return Topic.fromJson(discourseClient.post("/posts", createJson as Object, [:]))
-
     }
 
-
-    // update the topic first post if the title, raw or cooked fields have changed
+    /**
+     * Updates the content of the first post in a topic if any relevant fields have changed.
+     *
+     * @param oldTopic The existing topic to compare with.
+     * @param newTopic The updated topic containing the new data.
+     */
     private void updateTopicPost(Topic oldTopic, Topic newTopic) {
         if (newTopic.posts?.size() < 1 || newTopic.posts?.first()?.id == null) {
             log.debug("Topic has no posts - probably a new topic - skipping update. Also applies when the post is null")
             return
         }
-
 
         Map updatedFields = [:]
 
@@ -92,7 +106,12 @@ class TopicAccessClientImpl implements TopicAccessClient {
         discourseClient.doPut("/posts/${postId}", updatedFields)
     }
 
-    // update the topic meta if the category, tags or title have changed
+    /**
+     * Updates the metadata of a topic (such as category, tags, or title) if any fields have changed.
+     *
+     * @param oldTopic The existing topic to compare with.
+     * @param newTopic The updated topic containing the new data.
+     */
     private void updateTopicMeta(Topic oldTopic, Topic newTopic) {
         Map updatedFields = [:]
         if (oldTopic.category_id != newTopic.category_id) updatedFields.category_id = newTopic.category_id
@@ -107,9 +126,17 @@ class TopicAccessClientImpl implements TopicAccessClient {
         discourseClient.doPut("/t/${newTopic.topic_id}", updatedFields)
     }
 
+    /**
+     * Merges posts from the new version of a topic with the existing one, adding new posts as necessary.
+     *
+     * @param oldTopic The existing topic to compare with.
+     * @param newTopic The updated topic with potential new posts.
+     * @param traces A list of trace objects representing operations on the topic.
+     * @return The updated list of traces after merging posts.
+     */
     private List<INonPersistentTrace> mergeTopicPosts(Topic oldTopic, Topic newTopic, List<INonPersistentTrace> traces) {
         int counter
-        // For all comments in newTopic without an id - assuming it is new, add a post to the topic, ignore the first one
+        // For all comments in newTopic without an id - assuming it is new, add a post to the topic, ignoring the first one
         newTopic.posts?.each { post ->
             if (counter++ > 0 && !post.id) {
                 String localPostId = addPost(newTopic.topic_id, post.raw)
@@ -119,35 +146,43 @@ class TopicAccessClientImpl implements TopicAccessClient {
 
         return traces
 
-        // TODO - delete posts which have been deleted in newTopic
+        // TODO: Implement the deletion of posts that have been removed in the newTopic
     }
 
+    /**
+     * Updates the specified topic, applying changes to the post content and topic metadata.
+     * Also handles post traces.
+     *
+     * @param topic A Topic object containing the updated topic data.
+     * @param traces A list of trace objects representing operations on the topic.
+     * @return A map including the updated topic and updated traces.
+     * @throws DiscourseClientException If the topic lacks an ID or posts.
+     */
     @Override
-    Map<String, Object>  update(Topic topic, List<INonPersistentTrace> traces) {
-
-
+    Map<String, Object> update(Topic topic, List<INonPersistentTrace> traces) {
         log.debug("Updating topic: {} taking into account the traces {}", topic, traces)
+
         if (!topic.id || topic.posts?.size() < 1) {
             throw new DiscourseClientException("Trying to update a topic without an id - was it created first? (Topic: ${topic})")
         }
 
-        // updating a topic is about updating the content of the first post
+        // Fetch the existing topic to compare changes
         Topic oldTopic = getTopic(topic.topic_id)
 
-        // some fields need to be updated in the topic itself, other fields need to be updated in the first post
-
+        // Update both the posts and metadata of the topic
         traces = mergeTopicPosts(oldTopic, topic, traces)
         updateTopicPost(oldTopic, topic)
         updateTopicMeta(oldTopic, topic)
 
-
-        return ([topic:getTopic(topic.topic_id), traces: traces])
-
+        return ([topic: getTopic(topic.topic_id), traces: traces])
     }
 
-
-    /*
-    ** Post the new comment to the topic, return the id of the new post
+    /**
+     * Adds a new post to the given topic.
+     *
+     * @param aTopicId The ID of the topic to which the post will be added.
+     * @param rawContent The raw content of the new post.
+     * @return The unique ID of the newly added post.
      */
     @Override
     String addPost(String aTopicId, String rawContent) {
@@ -162,34 +197,45 @@ class TopicAccessClientImpl implements TopicAccessClient {
         return topicJson.id as String
     }
 
-
+    /**
+     * Executes a search query on Discourse with pagination support.
+     * This is a helper method for the public `search` method below.
+     *
+     * @param queryString The query string to execute.
+     * @param page The page number for paginated results.
+     * @return A map of search results.
+     */
     private Map executeSearchQuery(String queryString, Integer page) {
         String encodedQuery = URLEncoder.encode(queryString, 'UTF-8')
         return discourseClient.get("/search.json?q=${encodedQuery}&page=${page}")
     }
 
-
+    /**
+     * Searches for topics using a specific query and optionally filters based on a timestamp.
+     *
+     * @param query The search query string for finding topics.
+     * @param since Filters results to topics updated or created after this timestamp.
+     * @return A list of Topic objects matching the search criteria.
+     */
     @Override
     List<Topic> search(String query, Timestamp since) {
-        // compose the search query
-
+        // Compose the search query
         String encodedQuery = query ? URLEncoder.encode(query, 'UTF-8') : ""
         String separator = encodedQuery ? '&' : ''
         String utcDate
 
-
-        // if there is a timestamp, add it to the query
+        // Add a timestamp filter if provided
         if (since) {
             def sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
             utcDate = sdf.format(new Date(since.getTime()))
 
-            // query for all results updated after midnight of the given date, as Discourse doesn't allow for a time based query
+            // Adjust query to filter results updated after the specified date
             encodedQuery = "${encodedQuery}${separator}after:${utcDate.take(10)}"
         }
 
         if (!encodedQuery) {
-            // an empty query ...
+            // Return empty list for empty queries
             return []
         }
 
@@ -199,12 +245,9 @@ class TopicAccessClientImpl implements TopicAccessClient {
 
         log.debug("Search resulted in ${searchResult?.size()} entries (not yet filtered)")
 
-
-        // return the topic ids created after 'since' (if given) and matching the query.
+        // Collect and filter topics based on the timestamp
         return searchResult.topics?.collect { Topic.fromJson(it) }?.findAll { topic ->
             topic.last_posted_at >= utcDate || topic.created_at >= utcDate
         }
     }
-
-
 }

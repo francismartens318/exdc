@@ -30,7 +30,16 @@ import groovy.transform.builder.Builder
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
+/**
+ * Represents a topic in a Discourse forum.
+ * This class models the numerous properties and metadata that describe a topic, its states,
+ * related posts, and additional dynamic or optional fields.
+ *
+ * It also provides functionality for:
+ * - Parsing JSON data to populate the topic object fields from an external source.
+ * - Extracting key-related information, such as content, posts, and category identifiers.
+ * - Customizing behavior when dealing with unknown or dynamic fields from JSON responses.
+ */
 @CompileStatic
 @Builder
 class Topic {
@@ -146,54 +155,112 @@ class Topic {
     Map<String, Object> unknownFields = new HashMap<>()
 
 
+    /**
+     * Converts the Topic object into a readable string representation.
+     *
+     * This method overrides `toString()` for debugging purposes or when logging
+     * detailed information about a specific topic. It summarizes key values
+     * such as the ID, title, and category ID for quick reference.
+     *
+     * @return String - A concise representation of a Topic instance.
+     */
     @Override
     String toString() {
         return "Topic(id: $id, title: $title, category_id: $category_id ...)"
     }
 
+    /**
+     * Factory method for creating a `Topic` instance from JSON-like data.
+     *
+     * This method accepts a map of topic data (as returned from a JSON API) and
+     * converts it into a structured `Topic` object. It also processes nested structures,
+     * such as `post_stream.posts`, to extract `Post` objects.
+     *
+     * Additional metadata, such as the origin URL, can also be assigned to the
+     * `Topic` object for tracing data sources.
+     *
+     * @param topicData - A `Map` containing key-value pairs representing topic data.
+     * @param sourceUrl - (Optional) The URL source from where the topic data originated.
+     * @return Topic - A fully instantiated `Topic` object.
+     */
     static Topic fromJson(Map topicData, String sourceUrl = null) {
         ObjectMapper mapper = new ObjectMapper()
         Topic topic = mapper.convertValue(topicData, Topic.class)
 
-        // convert post_stream.posts to List<Post>
+        // Process nested field `post_stream.posts` and convert to Post objects.
         if (topic.post_stream && topic.post_stream.posts) {
             topic.posts = topic.post_stream.posts.collect { postData ->
                 return Post.fromJson(postData as Map)
             }
         }
-        // add the topic_origin_url to the topic
+        // Assign the source URL for record-keeping if provided.
         topic.origin_url = sourceUrl
 
         return topic
     }
 
+    /**
+     * Retrieves the first post in the topic's list of posts, if available.
+     *
+     * This method is useful for extracting the initial post of a topic, often
+     * considered the original or primary post when no explicit post ordering
+     * exists.
+     *
+     * @return Post - The first post within the `posts` list, or `null` if no posts exist.
+     */
     Post firstPost() {
         return posts.find { it.post_number == 1 }
     }
 
+    /**
+     * Fetches the unique identifier of the topic (Topic ID).
+     *
+     * If the topic's ID field (`topic_id`) is not explicitly set, this method
+     * attempts to retrieve it based on the first post's topic ID. This ensures
+     * a fallback mechanism when topic-level data is incomplete.
+     *
+     * @return String - The identifier for the topic.
+     */
     String getTopic_id() {
         return topic_id ?: posts?.first()?.topic_id
     }
 
+    /**
+     * Retrieves the cooked (rendered HTML) content of the topic.
+     *
+     * Cooked content refers to the processed, finalized version of a topic's
+     * content (e.g., HTML formatted). This method derives it dynamically
+     * from the first post in the topic's posts list.
+     *
+     * @return String - The cooked (HTML-rendered) content for the topic.
+     */
     String getCooked() {
-        // the cooked is calculated from the first post
-        return  posts?.first()?.cooked
+        return posts?.first()?.cooked
     }
 
+    /**
+     * Retrieves the raw (unprocessed) content of the topic.
+     *
+     * Raw content is typically the plain-text or unformatted version of a
+     * topic's content, often retrieved from the topic's first post. This raw
+     * data may include Markdown or another lightweight syntax, depending on
+     * the input format.
+     *
+     * @return String - The raw (unprocessed) content for the topic.
+     */
     String getRaw() {
-        //  the raw is calculated from the first post, given that the raw on the topic which can contain the summary of the topic.
         return posts?.first()?.raw ?: raw
     }
 
+    /**
+     * Returns the category ID of the topic.
+     *
+     * This method acts as an accessor for the `category_id` field, representing
+     * the unique identifier for the topic's category.
+     *
+     * @return Integer - The category ID for the topic.
+     */
     Integer getCategory_id() {
         return category_id
     }
-
-
-
-
-
-
-
-
 }
