@@ -29,10 +29,6 @@ import com.exalate.replication.services.issuetracker.GroovyHttpClient
 import customconnectornode.discourse.api.DiscourseClient
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import org.apache.hc.client5.http.classic.methods.HttpPut
-import org.apache.hc.core5.http.ClassicHttpResponse
-import org.apache.hc.core5.http.ContentType
-import org.apache.hc.core5.http.io.entity.StringEntity
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
