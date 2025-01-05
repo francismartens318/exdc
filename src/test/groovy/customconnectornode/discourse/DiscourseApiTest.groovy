@@ -305,7 +305,7 @@ class DiscourseApiTest extends Specification {
         result != null
         result.entity != null
         result.entity?.labels?.size() == 1
-        result.entity?.labels?.first() == "tag-tester"
+        result.entity?.labels?.first()?.label == "tag-tester"
     }
 
     def "search since now returns empty page response as there are no topics created after now"() {

@@ -63,3 +63,5 @@ Thumbs.db
 *.mov
 *.wmv
 
+/.groovylintrc.json
+/.vscode/settings.json
