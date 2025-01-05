@@ -29,6 +29,18 @@ import com.fasterxml.jackson.annotation.JsonAnySetter
 import groovy.transform.CompileStatic
 import groovy.transform.builder.Builder
 import com.fasterxml.jackson.databind.ObjectMapper
+/**
+ * Represents a Post model that maps JSON attributes to class members.
+ *
+ * This class utilizes the Jackson library for serialization and deserialization,
+ * allowing seamless conversion between JSON data and class instances. Any fields
+ * in the JSON that are not explicitly declared as members of this class will be
+ * captured in the `unknownFields` map using the `@JsonAnySetter` annotation.
+ *
+ * For details about the JSON structure and available fields in the Post object,
+ * refer to the official Discourse API documentation:
+ * https://docs.discourse.org/
+ */
 
 @CompileStatic
 @Builder
@@ -83,15 +95,28 @@ class Post {
 
 
 
+    /**
+     * Creates a `Post` instance from a JSON map using the Jackson library.
+     *
+     * @param postData - A map containing JSON data for a post.
+     * @return An instance of the `Post` class.
+     */
     static Post fromJson(Map postData) {
         ObjectMapper mapper = new ObjectMapper()
         return mapper.convertValue(postData, Post.class)
     }
 
-
+    /**
+     * Returns a string representation of the `Post` instance.
+     *
+     * This implementation provides basic information about the post ID,
+     * topic ID, and username to assist with debugging and logging.
+     *
+     * @return A string representation of the post.
+     */
     @Override
     String toString() {
         return "Post(id: $id, topic_id: $topic_id, username: $username)"
     }
-
 }
+

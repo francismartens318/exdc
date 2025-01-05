@@ -26,5 +26,12 @@ package customconnectornode.discourse.api
 import customconnectornode.discourse.domain.User
 
 interface UserAccessClient {
+
+    /**
+     * Retrieves user details for the specified user ID.
+     *
+     * @param userId The unique identifier of the user whose information is to be fetched.
+     * @return A User object containing the user's information (e.g., username, email, roles, etc.).
+     */
     User getUser(String userId)
 }
