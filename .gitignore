@@ -37,8 +37,9 @@ build/
 
 
 
-# JetBrains IDE
+# IDE
 .idea/
+.vscode/
 *.iml
 
 # Unit test reports
