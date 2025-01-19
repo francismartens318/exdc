@@ -33,44 +33,20 @@ import com.exalate.api.exception.CategorizedException
  * optional metadata (e.g., documentation links, root cause types) when an error occurs during
  * Discourse API operations.
  */
-class DiscourseClientException extends CategorizedException {
+class AttachmentTypeException extends CategorizedException {
 
-    /**
-     * Constructor for creating an exception instance with a specific error message.
-     *
-     * @param message A detailed error message describing what went wrong during the DiscourseClient operation.
-     */
-    DiscourseClientException(String message) {
+    AttachmentTypeException(String message) {
         super(message)
     }
 
-    /**
-     * Placeholder method for returning the link to documentation associated with this exception type.
-     *
-     * NOTE: This method is currently not implemented and returns a hardcoded placeholder string.
-     * In a production-grade application, this would ideally return a URL pointing to relevant
-     * documentation or troubleshooting steps.
-     *
-     * @return A placeholder string ("Not implemented").
-     */
     @Override
     String getDocsLink() {
         // TODO: Implement this method to return a URL pointing to relevant documentation or troubleshooting steps.
         return "Not implemented"
     }
 
-    /**
-     * Placeholder method for determining the root cause type of this exception.
-     *
-     * NOTE: This method is currently not implemented and returns a hardcoded placeholder string.
-     * This could be used to categorize error types (e.g., "ValidationError", "NetworkError") for
-     * improved debugging and error handling in a production environment.
-     *
-     * @return A placeholder string ("Not implemented").
-     */
     @Override
     String getRootCauseErrorTypeName() {
-        // TODO: Implement this method to categorize error types (e.g., "ValidationError", "NetworkError") for improved debugging and error handling.
-        return "Discourse Interaction Error"
+        return "Attachment Type Error"
     }
 }

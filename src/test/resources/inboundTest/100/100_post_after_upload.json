@@ -1,0 +1,74 @@
+{
+  "id": 714,
+  "name": "system",
+  "username": "system",
+  "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+  "created_at": "2025-02-12T05:54:52.615Z",
+  "cooked": "<p>Attachment(s) have been added:</p>\n<details>\n<summary>\nlogo-history.png</summary>\n<p><img src=\"/uploads/default/original/1X/5efd57efeab26d5c7e369592da01303bc42b7acc.png\" alt=\"logo-history.png\" data-base62-sha1=\"dyjFqtp8gk6yCZnalolk7NL3zIw\" width=\"800\" height=\"340\"></p>\n</details>",
+  "post_number": 2,
+  "post_type": 1,
+  "updated_at": "2025-02-12T05:54:52.615Z",
+  "reply_count": 0,
+  "reply_to_post_number": null,
+  "quote_count": 0,
+  "incoming_link_count": 0,
+  "reads": 0,
+  "readers_count": 0,
+  "score": 0,
+  "yours": true,
+  "topic_id": 331,
+  "topic_slug": "exdc-0212-take-1-long-enough-summary",
+  "display_username": "system",
+  "primary_group_name": null,
+  "flair_name": null,
+  "flair_url": null,
+  "flair_bg_color": null,
+  "flair_color": null,
+  "flair_group_id": null,
+  "version": 1,
+  "can_edit": true,
+  "can_delete": true,
+  "can_recover": false,
+  "can_see_hidden_post": true,
+  "can_wiki": true,
+  "user_title": null,
+  "bookmarked": false,
+  "raw": "Attachment(s) have been added: \n\n\n[details=logo-history.png]\n\n![logo-history.png|800x340](upload://dyjFqtp8gk6yCZnalolk7NL3zIw.png)\n\n[/details]",
+  "actions_summary": [
+    {
+      "id": 3,
+      "can_act": true
+    },
+    {
+      "id": 4,
+      "can_act": true
+    },
+    {
+      "id": 8,
+      "can_act": true
+    },
+    {
+      "id": 10,
+      "can_act": true
+    },
+    {
+      "id": 7,
+      "can_act": true
+    }
+  ],
+  "moderator": true,
+  "admin": true,
+  "staff": true,
+  "user_id": -1,
+  "draft_sequence": 0,
+  "hidden": false,
+  "trust_level": 4,
+  "deleted_at": null,
+  "user_deleted": false,
+  "edit_reason": null,
+  "can_view_edit_history": true,
+  "wiki": false,
+  "reviewable_id": null,
+  "reviewable_score_count": 0,
+  "reviewable_score_pending_count": 0
+}

@@ -26,27 +26,41 @@ package customconnectornode.discourse.transform
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.text.ParseException
 import java.text.SimpleDateFormat
 
 class Utils {
     private static final Logger logger = LoggerFactory.getLogger(Utils.class)
     private static final datePattern = "yyyy-MM-dd'T'HH:mm:ss.SSS"
+    private static final RFC1123Pattern = "EEE, dd MMM yyyy HH:mm:ss zzz"
 
     static Date getDateFromString(String dateString) {
-        try {
-                if (!dateString) {
-                    return null
-                }
+        if (!dateString) {
+            return null
+        }
 
-                def formatter = new SimpleDateFormat(datePattern)
-                formatter.setTimeZone(TimeZone.getTimeZone("UTC"))
-                return formatter.parse(dateString)
-            }
-        catch (Exception e) {
+        // Try RFC 1123 format first
+        SimpleDateFormat formatter = new SimpleDateFormat(RFC1123Pattern, Locale.US)
+
+        try {
+            return formatter.parse(dateString)
+        } catch (Exception e) {
+            if (! (e instanceof ParseException)) {
                 logger.error("Error parsing date string: ${dateString}", e)
                 return null
             }
+        }
 
+        // Fall back to original format
+        formatter = new SimpleDateFormat(datePattern)
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"))
+
+        try {
+            return formatter.parse(dateString)
+        } catch (Exception e) {
+            logger.error("Error parsing date string: ${dateString}", e)
+            return null
+        }
     }
 
     static String getStringFromDate(Date date) {

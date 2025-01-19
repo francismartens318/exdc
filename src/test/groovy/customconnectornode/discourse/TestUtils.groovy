@@ -23,10 +23,25 @@
 
 package customconnectornode.discourse
 
+
+import akka.stream.scaladsl.FileIO
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import com.exalate.api.domain.hubobject.IHubIssuePayload
+import com.exalate.api.domain.hubobject.IHubIssueReplica
+import com.exalate.basic.domain.blob.BlobMetadata
+import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
+import com.exalate.domain.node.storeblob.FileSystemStoredBlobMetaData
+import com.exalate.domain.node.storeblob.StoredBlobMetaData
+import com.exalate.replication.services.hubobject.ReplicaHelper
+import customconnectornode.domain.StreamableFileMetadata
 import io.github.cdimascio.dotenv.Dotenv
 import org.slf4j.LoggerFactory
+
+import java.nio.file.Paths
+import java.util.function.Supplier
 
 class TestUtils {
 
@@ -48,5 +63,25 @@ class TestUtils {
         System.setProperty("TRACKER_USER", dotenv.get("TRACKER_USER"))
         System.setProperty("TRACKER_PASSWORD", dotenv.get("TRACKER_PASSWORD"))
     }
+
+    static IHubIssueReplica getReplica(String payload) {
+        IHubIssuePayload ihip =  new ReplicaHelper().toHubIssuePayload(payload)
+        return ihip.getHubIssueReplica()
+    }
+
+//    static List<StreamableFileMetadata> getBlobMetadataList(String payload) {
+//        StreamableFileMetadata blobMetadata = new StreamableFileMetadata(
+//                new BlobMetadata(//TODO collect information),
+//                new FileSystemStoredBlobMetaData('/opt/customconnectornode/data/1_sync_2008'),
+//                new Supplier<Source<ByteString, ?>>() {
+//                    @Override
+//                    Source<ByteString, ?> get() {
+//                        FileIO.fromPath(Paths.get('/opt/customconnectornode/data/1_sync_2008'), 1024)
+//                    }
+//                }
+//        )
+//
+//        return [ blobMetadata ]
+//    }
 
 }

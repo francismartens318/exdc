@@ -27,23 +27,23 @@ import com.exalate.domain.http.GroovyHttpRequest
 import com.exalate.domain.http.GroovyHttpResponse
 import com.exalate.replication.services.issuetracker.HttpClient
 import customconnectornode.discourse.TestUtils
-import customconnectornode.discourse.domain.User
+import customconnectornode.discourse.domain.DiscourseCategory
+import customconnectornode.discourse.http.DiscourseCategoryAccessClientImpl
 import customconnectornode.discourse.http.DiscourseClientImpl
-import customconnectornode.discourse.http.UserAccessClientImpl
 import spock.lang.Specification
 
 import java.util.function.Supplier
 
-class UserAccessClientTest extends Specification {
+class DiscourseCategoryAccessClientTest extends Specification {
 
-    UserAccessClient userAccessClient
+    DiscourseCategoryAccessClient categoryAccessClient
     HttpClient httpClient
 
     def setup() {
         TestUtils.setupSpec()
         httpClient = Mock(HttpClient)
 
-        userAccessClient = new UserAccessClientImpl(new DiscourseClientImpl(httpClient))
+        categoryAccessClient = new DiscourseCategoryAccessClientImpl(new DiscourseClientImpl(httpClient))
     }
 
 
@@ -68,24 +68,43 @@ class UserAccessClientTest extends Specification {
         }
     }
 
-    def "should get user by username"() {
+    def "should get the categories"() {
         given:
-        def username = "kwak318"
 
         List<List<String>> methodBodyPairs = [
-                ["GET", getClass().getResource('/json/user_kwak318.json').text], // REturn the data of the user kwak318
-                ["GET", getClass().getResource('/json/user_kwak318_emails.json').text], // return fully populated topic as confirmation of the create
+                ["GET", getClass().getResource('/json/categories.json').text],
         ]
 
         mockHttpResponses(methodBodyPairs)
 
         when:
-        User result = userAccessClient.getUser(username)
+        List<DiscourseCategory> result = categoryAccessClient.fetchAllCategories()
+        Integer foundCategoryId = categoryAccessClient.fetchCategoryByName("General")?.id
+        String foundCategoryName = categoryAccessClient.fetchCategoryById(4)?.name
+
 
         then:
-        result.id == 4
-        result.username == username
-        result.name == "Kwak Dot Duck"
-        result.email == "kwak318@duck.com"
+        result.size() == 3
+        foundCategoryId == 4
+        foundCategoryName == "General"
+    }
+
+    def "should only fetch the categories once (and cache it)"() {
+        given:
+
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["SHOULDNOTHAPPEN", getClass().getResource('/json/categories.json').text],    // the second request should not happen
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+        when:
+        List<DiscourseCategory> result = categoryAccessClient.fetchAllCategories()
+        result = categoryAccessClient.fetchAllCategories()
+
+
+        then:
+        result.size() == 3
     }
 }

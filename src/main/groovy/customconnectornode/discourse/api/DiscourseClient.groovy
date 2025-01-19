@@ -23,6 +23,9 @@
 
 package customconnectornode.discourse.api
 
+import com.exalate.domain.http.MultiPartUploadGroovyHttpRequest
+import com.exalate.domain.http.StreamingGroovyHttpResponse
+
 
 interface DiscourseClient {
 
@@ -34,6 +37,15 @@ interface DiscourseClient {
      * @return A Map object containing the response data received from the API server.
      */
     Map get(String path, Map<String, List<String>> params)
+
+    /**
+     * TODO document the method
+     * @param path
+     * @param params
+     * @return
+     */
+
+    Map getResponseHeaders(String path, Map<String, List<String>> params)
 
     /**
      * Sends a POST request to the specified resource path with the provided payload and query parameters.
@@ -63,4 +75,9 @@ interface DiscourseClient {
      * @return A String containing the complete URI with the path and encoded query parameters.
      */
     String buildUri(String path, Map<String, List<String>> params)
+
+    StreamingGroovyHttpResponse download(String path)
+
+    Map uploadAttachment(List<MultiPartUploadGroovyHttpRequest.IFormPart> parts)
+
 }

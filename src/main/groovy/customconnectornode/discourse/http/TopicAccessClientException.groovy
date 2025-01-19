@@ -33,15 +33,15 @@ import com.exalate.api.exception.CategorizedException
  * optional metadata (e.g., documentation links, root cause types) when an error occurs during
  * Discourse API operations.
  */
-class DiscourseClientException extends CategorizedException {
+class TopicAccessClientException extends CategorizedException {
 
     /**
      * Constructor for creating an exception instance with a specific error message.
      *
      * @param message A detailed error message describing what went wrong during the DiscourseClient operation.
      */
-    DiscourseClientException(String message) {
-        super(message)
+    TopicAccessClientException(String message) {
+        super("<b>${message}</b><br>")
     }
 
     /**
@@ -56,7 +56,7 @@ class DiscourseClientException extends CategorizedException {
     @Override
     String getDocsLink() {
         // TODO: Implement this method to return a URL pointing to relevant documentation or troubleshooting steps.
-        return "Not implemented"
+        return "https://google.com"
     }
 
     /**
@@ -71,6 +71,6 @@ class DiscourseClientException extends CategorizedException {
     @Override
     String getRootCauseErrorTypeName() {
         // TODO: Implement this method to categorize error types (e.g., "ValidationError", "NetworkError") for improved debugging and error handling.
-        return "Discourse Interaction Error"
+        return "Not implemented"
     }
 }

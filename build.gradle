@@ -2,6 +2,12 @@ plugins {
     id 'java'
     id 'groovy'
     id 'org.jetbrains.kotlin.jvm' version '1.9.20'
+    id 'jacoco'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
 
 repositories {

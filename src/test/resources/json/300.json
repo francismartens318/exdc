@@ -1,0 +1,538 @@
+{
+  "post_stream": {
+    "posts": [
+      {
+        "id": 604,
+        "name": "system",
+        "username": "system",
+        "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+        "created_at": "2025-01-02T15:47:27.646Z",
+        "cooked": "<p>This is a test case to creating a topic with comments from a hubIssue</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "updated_at": "2025-01-02T15:47:27.646Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 2,
+        "readers_count": 1,
+        "score": 0,
+        "yours": false,
+        "topic_id": 300,
+        "topic_slug": "create-topic-with-comments-from-a-hubissue1735832846887",
+        "display_username": "system",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 1,
+        "can_edit": true,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": false,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 2,
+            "can_act": true
+          },
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": true,
+        "admin": true,
+        "staff": true,
+        "user_id": -1,
+        "hidden": false,
+        "trust_level": 4,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      },
+      {
+        "id": 675,
+        "name": "Francis Martens",
+        "username": "admin",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+        "created_at": "2025-01-19T21:21:11.723Z",
+        "cooked": "<p>Double attachment</p>\n<p><img src=\"/uploads/default/original/1X/50735faa12972a3a8cef2a4cc808df00e4f09718.jpeg\" alt=\"teampicture-thatsme\" data-base62-sha1=\"btHnQuJxbxa5JC2KQLpyiflODtm\" width=\"690\" height=\"460\"><br>\n<img src=\"/uploads/default/original/1X/fca98506638111b38fc57bb49ed7ac6384a66567.png\" alt=\"bluebearlogo\" data-base62-sha1=\"A39w27X1RczFJj56utjMlu09TX9\" width=\"380\" height=\"374\"></p>",
+        "post_number": 2,
+        "post_type": 1,
+        "updated_at": "2025-01-19T21:21:11.723Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 1,
+        "readers_count": 0,
+        "score": 0,
+        "yours": false,
+        "topic_id": 300,
+        "topic_slug": "create-topic-with-comments-from-a-hubissue1735832846887",
+        "display_username": "Francis Martens",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 1,
+        "can_edit": true,
+        "can_delete": true,
+        "can_recover": false,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": false,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 2,
+            "can_act": true
+          },
+          {
+            "id": 6,
+            "can_act": true
+          },
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": false,
+        "admin": true,
+        "staff": true,
+        "user_id": 1,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      }
+    ],
+    "stream": [
+      604,
+      675
+    ]
+  },
+  "timeline_lookup": [
+    [
+      1,
+      17
+    ],
+    [
+      2,
+      0
+    ]
+  ],
+  "suggested_topics": [
+    {
+      "id": 290,
+      "title": "The new title for the test case 1735828504174",
+      "fancy_title": "The new title for the test case 1735828504174",
+      "slug": "the-new-title-for-the-test-case-1735828504174",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2025-01-02T14:35:03.232Z",
+      "last_posted_at": "2025-01-02T14:35:03.338Z",
+      "bumped": true,
+      "bumped_at": "2025-01-02T14:35:03.338Z",
+      "archetype": "regular",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 1,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": 294,
+      "title": "Create topic with comments from a hubIssue1735831844462",
+      "fancy_title": "Create topic with comments from a hubIssue1735831844462",
+      "slug": "create-topic-with-comments-from-a-hubissue1735831844462",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2025-01-02T15:30:45.245Z",
+      "last_posted_at": "2025-01-02T15:30:45.423Z",
+      "bumped": true,
+      "bumped_at": "2025-01-02T15:30:45.423Z",
+      "archetype": "regular",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 0,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": 296,
+      "title": "Create topic with comments from a hubIssue1735832230793",
+      "fancy_title": "Create topic with comments from a hubIssue1735832230793",
+      "slug": "create-topic-with-comments-from-a-hubissue1735832230793",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2025-01-02T15:37:11.553Z",
+      "last_posted_at": "2025-01-02T15:37:11.702Z",
+      "bumped": true,
+      "bumped_at": "2025-01-02T15:37:11.702Z",
+      "archetype": "regular",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 0,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": 306,
+      "title": "Create topic with comments from a hubIssue1735852367540",
+      "fancy_title": "Create topic with comments from a hubIssue1735852367540",
+      "slug": "create-topic-with-comments-from-a-hubissue1735852367540",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2025-01-02T21:13:16.547Z",
+      "last_posted_at": "2025-01-02T21:13:16.686Z",
+      "bumped": true,
+      "bumped_at": "2025-01-02T21:13:16.686Z",
+      "archetype": "regular",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 1,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": 310,
+      "title": "Create topic with comments from a hubIssue1735853606044",
+      "fancy_title": "Create topic with comments from a hubIssue1735853606044",
+      "slug": "create-topic-with-comments-from-a-hubissue1735853606044",
+      "posts_count": 16,
+      "reply_count": 0,
+      "highest_post_number": 16,
+      "image_url": null,
+      "created_at": "2025-01-02T21:33:26.765Z",
+      "last_posted_at": "2025-01-04T14:55:02.384Z",
+      "bumped": true,
+      "bumped_at": "2025-01-04T14:55:02.384Z",
+      "archetype": "regular",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 2,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        }
+      ]
+    }
+  ],
+  "tags": [],
+  "tags_descriptions": {},
+  "id": 300,
+  "title": "Create topic with comments from a hubIssue1735832846887",
+  "fancy_title": "Create topic with comments from a hubIssue1735832846887",
+  "posts_count": 2,
+  "created_at": "2025-01-02T15:47:27.541Z",
+  "views": 2,
+  "reply_count": 0,
+  "like_count": 0,
+  "last_posted_at": "2025-01-19T21:21:11.723Z",
+  "visible": true,
+  "closed": false,
+  "archived": false,
+  "has_summary": false,
+  "archetype": "regular",
+  "slug": "create-topic-with-comments-from-a-hubissue1735832846887",
+  "category_id": 4,
+  "word_count": 27,
+  "deleted_at": null,
+  "user_id": -1,
+  "featured_link": null,
+  "pinned_globally": false,
+  "pinned_at": null,
+  "pinned_until": null,
+  "image_url": null,
+  "slow_mode_seconds": 0,
+  "draft": null,
+  "draft_key": "topic_300",
+  "draft_sequence": 0,
+  "unpinned": null,
+  "pinned": false,
+  "current_post_number": 1,
+  "highest_post_number": 2,
+  "deleted_by": null,
+  "has_deleted": false,
+  "actions_summary": [
+    {
+      "id": 4,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 8,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 10,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 7,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    }
+  ],
+  "chunk_size": 20,
+  "bookmarked": false,
+  "topic_timer": null,
+  "message_bus_last_id": 3,
+  "participant_count": 2,
+  "show_read_indicator": false,
+  "thumbnails": null,
+  "slow_mode_enabled_until": null,
+  "details": {
+    "can_edit": true,
+    "notification_level": 1,
+    "can_move_posts": true,
+    "can_delete": true,
+    "can_remove_allowed_users": true,
+    "can_invite_to": true,
+    "can_invite_via_email": true,
+    "can_create_post": true,
+    "can_reply_as_new_topic": true,
+    "can_flag_topic": true,
+    "can_convert_topic": true,
+    "can_review_topic": true,
+    "can_close_topic": true,
+    "can_archive_topic": true,
+    "can_split_merge_topic": true,
+    "can_edit_staff_notes": true,
+    "can_toggle_topic_visibility": true,
+    "can_pin_unpin_topic": true,
+    "can_moderate_category": true,
+    "can_remove_self_id": 2,
+    "participants": [
+      {
+        "id": -1,
+        "username": "system",
+        "name": "system",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/s/bcef8e/{size}.png",
+        "post_count": 1,
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_color": null,
+        "flair_bg_color": null,
+        "flair_group_id": null,
+        "admin": true,
+        "moderator": true,
+        "trust_level": 4
+      },
+      {
+        "id": 1,
+        "username": "admin",
+        "name": "Francis Martens",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+        "post_count": 1,
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_color": null,
+        "flair_bg_color": null,
+        "flair_group_id": null,
+        "admin": true,
+        "trust_level": 1
+      }
+    ],
+    "created_by": {
+      "id": -1,
+      "username": "system",
+      "name": "system",
+      "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png"
+    },
+    "last_poster": {
+      "id": 1,
+      "username": "admin",
+      "name": "Francis Martens",
+      "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png"
+    }
+  },
+  "bookmarks": []
+}

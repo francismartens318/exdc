@@ -23,8 +23,12 @@
 
 package customconnectornode.discourse.api
 
+
 import com.exalate.api.domain.twintrace.INonPersistentTrace
+import com.exalate.domain.http.StreamingGroovyHttpResponse
+
 import customconnectornode.discourse.domain.Topic
+import customconnectornode.discourse.domain.AttachmentMetaData
 
 import java.sql.Timestamp
 
@@ -69,7 +73,7 @@ interface TopicAccessClient {
      *
      * @param topicId the unique identifier of the topic to add the post to.
      * @param content the content of the post to be added.
-     * @return a response or confirmation indicating the result of the post addition.
+     * @return the id of the newly added post.
      */
     String addPost(String topicId, String content);
 
@@ -82,4 +86,27 @@ interface TopicAccessClient {
      * @return a list of topics that match the search criteria.
      */
     List<Topic> search(String query, Timestamp since);
+
+
+    /**
+     * Downloads an attachment file associated with a topic.
+     *
+     * @param fileId the unique identifier of the file to download
+     * Note that discourse stores attachments in a single bucket, so the attachment is not related to a topic itself.
+     * @return StreamingGroovyHttpResponse containing the downloaded attachment data
+     */
+
+    StreamingGroovyHttpResponse downloadAttachment(String fileId)
+
+
+    /**
+     * Gets all relevant information about a file attachment
+     * - mimetype
+     * - filesize
+     * - lastModified
+     *
+     * @param fileId
+     * @return
+     */
+    AttachmentMetaData getAttachmentMetadata(String fileId)
 }
