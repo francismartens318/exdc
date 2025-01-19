@@ -43,21 +43,29 @@ echo "SMTP_PASS      = 'XXX'"
 echo "SMTP_TLS       = '${SMTP_TLS}'"
 
 #
-# SNOWNODE-202 - add support for proxy
 #
+#
+
+if [ "z${PROXY_DISABLE_SSL_CHECK}" = "ztrue" ]; then
+    PROXY_SSL_CHECK="-Dplay.ws.ssl.loose.acceptAnyCertificate=true -Dplay.ws.ssl.loose.disableHostnameVerification=true"
+fi
+echo "PROXY_SSL_CHECK = ${PROXY_SSL_CHECK}"
+
 if [[ ! -z "${PROXY_HTTP_HOST}" && ! -z "${PROXY_HTTP_PORT}" ]]; then
    echo "Setting up PROXY HTTP on ${PROXY_HTTP_HOST}:${PROXY_HTTP_PORT}"
 
    PROXYHTTP="-Dhttp.proxyHost=${PROXY_HTTP_HOST} -Dhttp.proxyPort=${PROXY_HTTP_PORT}"
-   PROXYENABLE="-Dplay.ws.useProxyProperties=true"
+   PROXYENABLE="-Dplay.ws.useProxyProperties=true ${PROXY_SSL_CHECK}"
+
 fi
 
 if [[ ! -z "${PROXY_HTTPS_HOST}" && ! -z "${PROXY_HTTPS_PORT}" ]]; then
    echo "Setting up PROXY HTTPS on ${PROXY_HTTPS_HOST}:${PROXY_HTTPS_PORT}" 
 
    PROXYHTTPS="-Dhttps.proxyHost=${PROXY_HTTPS_HOST} -Dhttps.proxyPort=${PROXY_HTTPS_PORT}"
-   PROXYENABLE="-Dplay.ws.useProxyProperties=true"
+   PROXYENABLE="-Dplay.ws.useProxyProperties=true ${PROXY_SSL_CHECK}"
 fi
+
 
 
 #export CUSTOM_CONNECTOR_ALWAYS_RELOAD=true
@@ -71,6 +79,12 @@ ls -lR /opt/customconnectornode/data/scripts/customconnectornode
 echo "+++ external lib directory"
 ls -lR /opt/customconnectornode/install/lib/external
 
+#echo "+++ Scripts directory"
+#ls -lR /opt/customconnectornode/data/scripts/customconnectornode
+#
+#echo "+++ lib directory"
+#ls -lR /opt/customconnectornode/install/lib
+#
 echo "+++ Environment"
 printenv
 echo "-----------------------------------------"

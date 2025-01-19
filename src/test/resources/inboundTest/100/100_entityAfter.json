@@ -1,0 +1,19 @@
+{
+  "validOn" : {
+    "timeMillis" : 1739338754465
+  },
+  "issueKey" : null,
+  "summary" : { },
+  "payload" : {
+    "version" : {
+      "major" : 1,
+      "minor" : 0,
+      "patch" : 0
+    },
+    "hubIssue" : {
+      "category_id" : 4
+    },
+    "issueUrl" : null
+  },
+  "payloadAsString" : "{\"version\":{\"major\":1,\"minor\":0,\"patch\":0},\"hubIssue\":{\"category_id\":4,\"voters\":[],\"fixVersions\":[],\"internalMap\":{\"category_id\":4},\"labels\":[],\"customKeys\":{},\"entityProperties\":{},\"components\":[],\"attachments\":[{\"mimetype\":\"image/png\",\"filename\":\"logo-history.png\",\"created\":1739338144911,\"filesize\":14775,\"remoteId\":\"12923\",\"author\":{\"key\":\"admin\",\"active\":true,\"email\":\"francisblue+admin@idalko.com\",\"displayName\":\"Admin\",\"username\":\"admin\"},\"thumbnailable\":true,\"internal\":false,\"zip\":false}],\"customFields\":{},\"eventTriggerContext\":{},\"description\":\"ExDC - 0212 - Take 1 - long enough description\\r\\nExDC - 0212 - Take 1 - long enough description\\r\\n\",\"watchers\":[],\"summary\":\"ExDC - 0212 - Take 1 - long enough summary\",\"comments\":[],\"workLogs\":[],\"affectedVersions\":[]}}"
+}

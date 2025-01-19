@@ -23,11 +23,26 @@
 
 package customconnectornode.discourse.http
 
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+
 import com.exalate.api.domain.twintrace.INonPersistentTrace
+import com.exalate.api.domain.twintrace.TraceAction
+import com.exalate.api.domain.twintrace.TraceType
+import com.exalate.basic.domain.BasicNonPersistentTrace
+import com.exalate.basic.domain.hubobject.v1.BasicHubAttachment
+import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
+import com.exalate.domain.http.GroovyHttpResponse
+import com.exalate.domain.http.MultiPartUploadGroovyHttpRequest
+import com.exalate.domain.http.StreamingGroovyHttpResponse
+import customconnectornode.discourse.api.DiscourseCategoryAccessClient
 import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.TopicAccessClient
+import customconnectornode.discourse.domain.AttachmentMetaData
 import customconnectornode.discourse.domain.Topic
 import customconnectornode.discourse.transform.TopicReplica
+import customconnectornode.discourse.transform.Utils
+import customconnectornode.domain.StreamableFileMetadata
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -38,10 +53,22 @@ class TopicAccessClientImpl implements TopicAccessClient {
     private static final Logger log = LoggerFactory.getLogger(TopicAccessClientImpl.class)
 
     private DiscourseClient discourseClient
+    private DiscourseCategoryAccessClient categoryAccessClient
 
     // Constructor to initialize the client with the DiscourseClient dependency.
-    TopicAccessClientImpl(DiscourseClient dc) {
+    TopicAccessClientImpl(DiscourseClient dc, DiscourseCategoryAccessClient categoryAccessClient) {
         this.discourseClient = dc
+        this.categoryAccessClient = categoryAccessClient
+    }
+
+
+    void fixCategory(Topic topic) {
+        if (!topic?.category_id && !topic?.category) {
+            throw new DiscourseClientException("Topic has no category specified")
+        }
+
+        topic.category = topic.category ?: categoryAccessClient.fetchCategoryById(topic.category_id).name
+        topic.category_id = topic.category_id ?: categoryAccessClient.fetchCategoryByName(topic.category).id
     }
 
     /**
@@ -60,7 +87,11 @@ class TopicAccessClientImpl implements TopicAccessClient {
             log.debug("Getting topic ${topicId} failed with error ${e.message}, returning null")
             return null
         }
-        return resultJson ? Topic.fromJson(resultJson, discourseClient.buildUri(topicUrl, [:])) : null
+
+        if (!resultJson) return null
+        Topic topic = Topic.fromJson(resultJson, discourseClient.buildUri(topicUrl, [:]))
+        fixCategory(topic)
+        return topic
     }
 
     /**
@@ -70,13 +101,16 @@ class TopicAccessClientImpl implements TopicAccessClient {
      * @return The created Topic object.
      */
     Topic create(Topic topic) {
+        fixCategory(topic)
         Map createJson = [
                 title: topic.title,
                 raw: topic.raw,
-                category: topic.category
+                category: topic.category_id
+
         ]
 
-        return Topic.fromJson(discourseClient.post("/posts", createJson as Object, [:]))
+        Map resultJson = discourseClient.post("/posts.json", createJson as Object, [:])
+        return Topic.fromJson(resultJson)
     }
 
     /**
@@ -140,13 +174,29 @@ class TopicAccessClientImpl implements TopicAccessClient {
         newTopic.posts?.each { post ->
             if (counter++ > 0 && !post.id) {
                 String localPostId = addPost(newTopic.topic_id, post.raw)
-                traces.add(TopicReplica.toCommentTrace(localPostId, post.remote_id))
+
+                // only add a trace if the post has a remote_id
+                if (post.remote_id) {
+                    traces.add(TopicReplica.toCommentTrace(localPostId, post.remote_id))
+                }
             }
         }
 
         return traces
 
         // TODO: Implement the deletion of posts that have been removed in the newTopic
+    }
+
+
+
+
+    private static StreamableFileMetadata findFileMetadata(List<StreamableFileMetadata> fileMetadataList, String attachmentRemoteId) {
+        fileMetadataList.find { fileMetaData ->  fileMetaData.blobMetaData().blobId == attachmentRemoteId }
+    }
+
+    private List<INonPersistentTrace> mergeTopicAttachments(Topic newTopic, List<INonPersistentTrace> traces) {
+        return traces
+
     }
 
     /**
@@ -168,6 +218,7 @@ class TopicAccessClientImpl implements TopicAccessClient {
 
         // Fetch the existing topic to compare changes
         Topic oldTopic = getTopic(topic.topic_id)
+        traces = mergeTopicAttachments(topic, traces)
 
         // Update both the posts and metadata of the topic
         traces = mergeTopicPosts(oldTopic, topic, traces)
@@ -249,5 +300,44 @@ class TopicAccessClientImpl implements TopicAccessClient {
         return searchResult.topics?.collect { Topic.fromJson(it) }?.findAll { topic ->
             topic.last_posted_at >= utcDate || topic.created_at >= utcDate
         }
+    }
+
+
+    StreamingGroovyHttpResponse downloadAttachment(String fileId) {
+        return discourseClient.download("/uploads/default/original/1X/${fileId}")
+    }
+
+    /**
+     * Uploads an attachment via the DiscourseClient implementation.
+     *
+     * @param parts A list of form parts for the multipart upload.
+     * @param entityId The ID of the entity to which the attachment belongs.
+     * @return An instance of Map containing the server response.
+     */
+    Map uploadAttachment(List<MultiPartUploadGroovyHttpRequest.IFormPart> parts, String entityId) {
+        return discourseClient.uploadAttachment("/uploads", parts, [:])
+    }
+    /**
+     * Retrieves metadata about an attachment file, by accessing the file ...
+     *
+     *
+     * @param fileId
+     * @return
+     */
+
+    AttachmentMetaData getAttachmentMetadata(String fileId) {
+        // TODO: this is a workaround until the attachment metadata is available in the API, an alternative is to cache the information
+
+        Map responseHeaders = discourseClient.getResponseHeaders("/uploads/default/original/1X/${fileId}")
+
+        String mimeType = responseHeaders.get("Content-Type")?.first()
+        Long fileSize = responseHeaders.get("content-length")?.first()?.toLong()
+
+        return new AttachmentMetaData().builder()
+                    .mimeType(mimeType)
+                    .fileName(fileId as String)
+                    .fileSize(fileSize)
+                    .lastModified(Utils.getDateFromString(responseHeaders.get("Last-Modified")?.first() as String))
+                    .build()
     }
 }

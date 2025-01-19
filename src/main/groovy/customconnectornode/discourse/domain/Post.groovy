@@ -88,11 +88,11 @@ class Post {
     Boolean version
     Boolean wiki
     Boolean yours
+    List<String> attachmentIDs
 
 
     @JsonAnySetter
     Map<String, Object> unknownFields = new HashMap<>()
-
 
 
     /**
@@ -103,7 +103,26 @@ class Post {
      */
     static Post fromJson(Map postData) {
         ObjectMapper mapper = new ObjectMapper()
-        return mapper.convertValue(postData, Post.class)
+        Post resultPost = mapper.convertValue(postData, Post.class)
+
+
+        // Extract attachment IDs from cooked HTML content
+        if (resultPost.cooked) {
+            resultPost.attachmentIDs = extractAttachmentIds(resultPost.cooked)
+        }
+
+        return resultPost
+    }
+
+    private static List<String> extractAttachmentIds(String cookedHtml) {
+        List<String> attachmentIds = []
+        def pattern = ~/\/uploads\/default\/original\/\w+\/([a-f0-9]+\.[a-zA-Z]+)/
+
+        cookedHtml.findAll(pattern) { fullMatch, attachmentId ->
+            attachmentIds.add(attachmentId as String)
+        }
+
+        return attachmentIds
     }
 
     /**

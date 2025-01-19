@@ -32,13 +32,17 @@ import com.exalate.api.domain.twintrace.TraceAction
 import com.exalate.api.domain.twintrace.TraceType
 import com.exalate.basic.domain.BasicIssueKey
 import com.exalate.basic.domain.BasicNonPersistentTrace
+import com.exalate.basic.domain.hubobject.v1.BasicHubAttachment
 import com.exalate.basic.domain.hubobject.v1.BasicHubComment
 import com.exalate.basic.domain.hubobject.v1.BasicHubCustomField
 import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
 import com.exalate.basic.domain.hubobject.v1.BasicHubLabel
 import com.exalate.basic.domain.hubobject.v1.BasicHubUser
+import customconnectornode.discourse.domain.AttachmentMetaData
 import customconnectornode.discourse.domain.Post
 import customconnectornode.discourse.domain.Topic
+import customconnectornode.discourse.http.DiscourseClientException
+import customconnectornode.discourse.http.TopicAccessClientException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -78,9 +82,16 @@ class TopicReplica {
         return trace
     }
 
-    static void addCategory(BasicHubIssue replica, String category) {
+    static void addCategory(BasicHubIssue replica, Integer category_id, String category) {
+        if (!category || !category_id) {
+            throw DiscourseClientException("Nor category_id nor category provided ... ")
+        }
+
+        replica.category_id = category_id
+        replica.category = category
+
         replica.customFields.put("category",
-                buildCustomField(1L, "Category", category, "Category section", HubCustomFieldType.STRING, category)
+                buildCustomField(1L, "DiscourseCategory", category_id as String, "DiscourseCategory section", HubCustomFieldType.STRING, category)
         )
     }
     static BasicHubIssue toReplica(Topic topic) {
@@ -100,27 +111,62 @@ class TopicReplica {
                                             }
 
 
-        addCategory(replica, topic.category_id as String)
+        addCategory(replica, topic.category_id , topic.category)
+
+
+        Integer commentsAdded = 0
 
         // add posts as comments, excluding the first post because that is the topic itself
-
-        topic.posts?.drop(1)?.each { post ->
+        topic.posts?.each { post ->
                     def comment = new BasicHubComment()
                     comment.id = post.id
                     comment.body = post.cooked ?: post.raw
                     comment.created = Utils.getDateFromString(post.created_at)
                     comment.updated = Utils.getDateFromString(post.updated_at)
                     comment.author = getHubUser(post.display_username, post.username, post.user_id)
-                    replica.comments << comment
+
+                    addAttachmentsToReplica(replica, comment, post.attachmentIDs)
+
+                    // Don't add the topic itself as a comment
+                    if (commentsAdded++ > 0) replica.comments << comment
                 }
-
-
 
         replica.entityKey = toEntityKey(topic)
         replica.setEntityUrl(topic.origin_url)
         return replica
     }
 
+
+    private static void addAttachmentsToReplica(BasicHubIssue replica, BasicHubComment sourceComment, List<String> postAttachments) {
+
+        // first collect all potential attachments from the post
+        List<BasicHubAttachment> attachments = postAttachments.collect { String attachmentID ->
+            BasicHubAttachment attachment = new BasicHubAttachment()
+            attachment.id = attachmentID
+            attachment.filename = attachmentID
+
+            // TODO - get the mimetype from the attachment
+            attachment.mimetype = "application/octet-stream"
+
+            attachment.author = sourceComment.author
+            attachment.created = sourceComment.created
+            attachment.internal = false // there is no such thing as internal comments
+            attachment.zip = false
+
+            attachment
+        }
+
+
+        // check what attachments are new and add them to the replica.attachment list
+        List<BasicHubAttachment> attachmentsToAdd = replica.getAttachments()
+        attachments.each { BasicHubAttachment attachment ->
+            if (!attachmentsToAdd.find { it.filename == attachment.filename}) {
+                attachmentsToAdd << attachment
+            }
+        }
+
+        replica.setAttachments(attachmentsToAdd)
+    }
 
     /*
     **      convert a hub issue replica into a topic
@@ -130,6 +176,8 @@ class TopicReplica {
     static Topic toTopic(BasicHubIssue basicHubIssue) {
 
         List<Post> posts = []
+
+        validateBasicHubIssue(basicHubIssue)
 
         posts.add(new Post().builder()
                         .created_at(Utils.getStringFromDate(basicHubIssue.created))
@@ -155,8 +203,6 @@ class TopicReplica {
                         .build())
                 }
 
-
-
         def tagList = basicHubIssue.getLabels().collect { it.label.toString() }
 
 
@@ -167,8 +213,8 @@ class TopicReplica {
                 .raw(basicHubIssue.description as String)
                 .created_at(Utils.getStringFromDate(basicHubIssue.created as Date))
                 .updated_at(Utils.getStringFromDate(basicHubIssue.updated as Date))
-                .category(basicHubIssue.customFields?.get("category")?.uid as String)
-                .category_id(basicHubIssue.customFields?.get("category")?.uid as Integer)
+                .category_id(basicHubIssue.category_id)
+                .category(basicHubIssue.category)
                 .tags(tagList)
                 .posts(posts)
                 .post_number(posts.size())
@@ -181,5 +227,69 @@ class TopicReplica {
         log.debug("Creating issue key for topic ${topic.id}")
 
         return new BasicIssueKey(topic.id as String, topic.id as String, "topic")
+    }
+
+    /**
+     * Validates if a BasicHubIssue meets the requirements to be considered a valid topic.
+     *
+     * @param basicHubIssue The BasicHubIssue to validate
+     * @throws TopicAccessClientException if any validation fails:
+     *         - If basicHubIssue is null
+     *         - If summary is null or less than 15 characters
+     *         - If description is null or less than 20 characters
+     *         - If category_id is null
+     */
+
+    private static void validateBasicHubIssue(BasicHubIssue basicHubIssue) {
+        if (!basicHubIssue) {
+            throw new TopicAccessClientException("BasicHubIssue is null")
+        }
+
+        if (!basicHubIssue.summary) {
+            throw new TopicAccessClientException("Summary is null")
+        }
+
+        if (basicHubIssue.summary.length() < 15) {
+            throw new TopicAccessClientException("Summary is too short, needs to be at least 15 characters")
+        }
+
+        if (!basicHubIssue.description) {
+            throw new TopicAccessClientException("Description is null")
+        }
+
+        if (basicHubIssue.description.length() < 20) {
+            throw new TopicAccessClientException("Description is too short, needs to be at least 20 characters")
+        }
+
+        if (!basicHubIssue.category_id) {
+            throw new TopicAccessClientException("Category_id is null")
+        }
+    }
+
+    static void checkBasicHubIssueIsGoodTopic(BasicHubIssue basicHubIssue) {
+        if (!basicHubIssue) {
+            throw new TopicAccessClientException("BasicHubIssue is null")
+        }
+
+        if (!basicHubIssue.summary) {
+            throw new TopicAccessClientException("Summary is null")
+        }
+
+        if (basicHubIssue.summary.length() < 15) {
+            throw new TopicAccessClientException("Summary is too short, needs to be at least 15 characters")
+        }
+
+        if (!basicHubIssue.description) {
+            throw new TopicAccessClientException("Description is null")
+        }
+
+        if (basicHubIssue.description.length() < 20) {
+            throw new TopicAccessClientException("Description is too short, needs to be at least 20 characters")
+        }
+
+        if (!basicHubIssue.category_id) {
+            throw new TopicAccessClientException("Category_id is null")
+        }
+
     }
 }

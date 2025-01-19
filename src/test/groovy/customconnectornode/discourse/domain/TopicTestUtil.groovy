@@ -59,7 +59,7 @@ class TopicTestUtil {
         return new Topic().builder()
                         .title("My Test Topic to check the test case '${includeTitle}' at ${System.currentTimeMillis()}")
                         .raw("This is the description of my test topic " + System.currentTimeMillis())
-                        .category("4")
+                        .category("General")
                         .category_id(4)
                         .created_at()
                         .build()

@@ -23,6 +23,9 @@
 
 package customconnectornode.discourse
 
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+
 import com.exalate.api.domain.IIssueKey
 import com.exalate.api.domain.hubobject.EntityType
 import com.exalate.api.domain.hubobject.IHubIssueReplica
@@ -32,6 +35,7 @@ import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
 import com.exalate.basic.domain.hubobject.v1.BasicHubLabel
 import com.exalate.domain.http.GroovyHttpRequest
 import com.exalate.domain.http.GroovyHttpResponse
+import com.exalate.domain.http.StreamingGroovyHttpResponse
 import com.exalate.replication.services.issuetracker.HttpClient
 import customconnectornode.discourse.domain.Topic
 import customconnectornode.discourse.domain.TopicTestUtil
@@ -39,6 +43,8 @@ import customconnectornode.discourse.http.DiscourseClientException
 import customconnectornode.discourse.transform.TopicReplica
 import customconnectornode.discourse.transform.Utils
 import customconnectornode.domain.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import play.api.Application
 import play.api.inject.Injector
 import spock.lang.Specification
@@ -49,6 +55,9 @@ import java.util.function.Supplier
 class DiscourseApiTest extends Specification {
     @Subject
     DiscourseApi discourseApi
+
+
+    private static final Logger log = LoggerFactory.getLogger(DiscourseApiTest.class)
     TopicTestUtil topicTestUtil
 
     Application application
@@ -72,14 +81,18 @@ class DiscourseApiTest extends Specification {
         Integer requestStep = 0
 
         httpClient.http(_ as GroovyHttpRequest) >> { GroovyHttpRequest request ->
+            log.debug("Processing requestStep ${requestStep} with ${request}")
             // assert that the request is what is expected (based on the requestStep) and that the url is valid (based on the regex)
-            assert request.method == methodBodyPairs[requestStep][0]
+            assert requestStep < methodBodyPairs.size(), "Request step out of bounds"
+            assert request.method == methodBodyPairs[requestStep][0], "Request method does not match expected value "
             assert request.url ==~ /^https?:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/\S*)?$/
 
-            def jsonString = methodBodyPairs[requestStep][1]
+
+            def jsonString = methodBodyPairs[requestStep][1] ?: "{}"
+            def headers = methodBodyPairs[requestStep].size() > 2 ? methodBodyPairs[requestStep][2] : [:]
             def response = new GroovyHttpResponse(
                     200,
-                    [:],
+                    headers as Map<String, List<String>>,
                     { -> jsonString } as Supplier<String>,
                     { -> jsonString } as Supplier<Object>
             )
@@ -88,6 +101,7 @@ class DiscourseApiTest extends Specification {
             return response
         }
     }
+
 
     def "searchEntityTypes returns correct entity types"() {
         given:
@@ -107,15 +121,14 @@ class DiscourseApiTest extends Specification {
         BasicIssueKey entityKey = new BasicIssueKey("7", "7", "topic")
 
 
-        def jsonString = getClass().getResource('/7.json').text
-        def mockResponse = new GroovyHttpResponse(
-                200,
-                [:],
-                { -> jsonString } as Supplier<String>,
-                { -> jsonString } as Supplier<Object>
-        )
 
-        httpClient.http(_ as GroovyHttpRequest) >> mockResponse
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/json/7.json').text],
+                ["GET", getClass().getResource('/json/categories.json').text],
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
 
         when:
         IHubIssueReplica result = discourseApi.readEntity(entityKey)
@@ -126,13 +139,14 @@ class DiscourseApiTest extends Specification {
         result.key == "7"
         result.summary == "Test Topic to check the test cases"
         result.description == "<p>This topic is to validate the test case</p>"
-//            result.created.toString() == "Mon Dec 23 12:28:09 CET 2024"
+        result.category == "General"
+        result.category_id == 4
 
 
         result.customFields.size() == 1
 
         // check category custom field
-        result.customFields["category"]?.name == "Category"
+        result.customFields["category"]?.name == "DiscourseCategory"
         result.customFields["category"].id == 1
         result.customFields["category"].uid == "4"
 
@@ -162,15 +176,13 @@ class DiscourseApiTest extends Specification {
         given:
 
         BasicIssueKey entityKey = new BasicIssueKey("", "10000000", "topic")
-        def jsonString = getClass().getResource('/7.json').text
-        def mockResponse = new GroovyHttpResponse(
-                200,
-                [:],
-                { -> jsonString } as Supplier<String>,
-                { -> jsonString } as Supplier<Object>
-        )
 
-        httpClient.http(_ as GroovyHttpRequest) >> mockResponse
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/json/7.json').text],
+                ["GET", getClass().getResource('/json/categories.json').text],
+        ]
+
+        mockHttpResponses(methodBodyPairs)
 
         when:
         Boolean result = discourseApi.doesEntityExist(entityKey)
@@ -195,15 +207,17 @@ class DiscourseApiTest extends Specification {
     def "writeEntity returns EntityWriteResult with provided entity"() {
         given:
 
-        def jsonString = getClass().getResource('/306.json').text
-        def mockResponse = new GroovyHttpResponse(
-                200,
-                [:],
-                { -> jsonString } as Supplier<String>,
-                { -> jsonString } as Supplier<Object>
-        )
 
-        httpClient.http(_ as GroovyHttpRequest) >> mockResponse
+        List<List<String>> methodBodyPairs = [
+                ["POST", getClass().getResource('/json/306.json').text],        // create the test topic
+                ["GET", getClass().getResource('/json/306.json').text],         // fetch the test topic
+                ["GET", getClass().getResource('/json/categories.json').text],  // fetch the categories
+                ["GET", getClass().getResource('/json/306.json').text],         // fetch the resulting topic (after the write)
+                ["PUT", getClass().getResource('/json/306.json').text],         // Put an update
+                ["GET", getClass().getResource('/json/306-after-update.json').text],         // Get the updated topic
+        ]
+
+        mockHttpResponses(methodBodyPairs)
 
         when:
         Topic testTopic = topicTestUtil.createAndFetchTopic("Update entity")
@@ -211,7 +225,7 @@ class DiscourseApiTest extends Specification {
 
 
         IHubIssueReplica entityBeforeScript = TopicReplica.toReplica(testTopic)
-        testTopic.title = "The new title for the test case  " + System.currentTimeMillis()
+        testTopic.title = "The new title for the test case"
         testTopic.raw = "The new raw for the test case  " + System.currentTimeMillis()
         IHubIssueReplica entityAfterScript = TopicReplica.toReplica(testTopic)
 
@@ -220,9 +234,47 @@ class DiscourseApiTest extends Specification {
         EntityWriteResult result = discourseApi.writeEntity(testTopicKey, entityBeforeScript, entityAfterScript, traces, blobMetadataList)
 
         then:
-        result != null
-        result.entity == entityAfterScript
+        result?.entity != null
+        testTopic.title == entityAfterScript.summary
         result.traces == traces
+    }
+
+    def "update a IssueHubObject with 2 comments and persist it" () {
+        given:
+
+
+        // the methodBodyPairs contains the method and the json response for each step in handling an update
+
+        List<List<String>> methodBodyPairs = [
+                ["POST", getClass().getResource('/json/638.json').text],
+                ["GET", getClass().getResource('/json/312-initial.json').text],
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/312-initial.json').text],
+                ["POST", getClass().getResource('/json/639.json').text],
+                ["PUT", getClass().getResource('/json/312-after-put.json').text],
+                ["GET", getClass().getResource('/json/312-final.json').text]
+
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+        when:
+
+        BasicHubIssue hubIssue = new BasicHubIssue()
+        hubIssue.summary = "Create topic with comments from a hubIssue " + System.currentTimeMillis()
+        hubIssue.description = "This is a test case to creating a topic with comments from a hubIssue"
+        TopicReplica.addCategory(hubIssue, 4, "General")
+
+
+        hubIssue.comments.add(TopicTestUtil.someComment("This is a test comment " + System.currentTimeMillis()))
+
+
+        List<INonPersistentTrace> traces = []
+        List<StreamableFileMetadata> blobMetadataList = []
+        EntityWriteResult result = discourseApi.writeEntity(null, null, hubIssue, traces, blobMetadataList)
+
+        then:
+        result.entity?.comments?.size() == 1
     }
 
     def "create a IssueHubObject of type topic with comments and persist it"() {
@@ -232,12 +284,13 @@ class DiscourseApiTest extends Specification {
         // the methodBodyPairs contains the method and the json response for each step in handling an update
 
         List<List<String>> methodBodyPairs = [
-                ["POST", getClass().getResource('/638.json').text],
-                ["GET", getClass().getResource('/312-initial.json').text],
-                ["GET", getClass().getResource('/312-initial.json').text],
-                ["POST", getClass().getResource('/639.json').text],
-                ["PUT", getClass().getResource('/312-after-put.json').text],
-                ["GET", getClass().getResource('/312-final.json').text]
+                ["POST", getClass().getResource('/json/638.json').text],
+                ["GET", getClass().getResource('/json/312-initial.json').text],
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/312-initial.json').text],
+                ["POST", getClass().getResource('/json/639.json').text],
+                ["PUT", getClass().getResource('/json/312-after-put.json').text],
+                ["GET", getClass().getResource('/json/312-final.json').text]
 
         ]
 
@@ -247,7 +300,7 @@ class DiscourseApiTest extends Specification {
         BasicHubIssue hubIssue = new BasicHubIssue()
         hubIssue.summary = "Create topic with comments from a hubIssue " + System.currentTimeMillis()
         hubIssue.description = "This is a test case to creating a topic with comments from a hubIssue"
-        TopicReplica.addCategory(hubIssue, "4")
+        TopicReplica.addCategory(hubIssue, 4, "General")
 
 
         hubIssue.comments.add(TopicTestUtil.someComment("This is a test comment " + System.currentTimeMillis()))
@@ -266,16 +319,17 @@ class DiscourseApiTest extends Specification {
         // the methodBodyPairs contains the method and the json response for each step in handling an update
 
         List<List<String>> methodBodyPairs = [
-                ["POST", getClass().getResource('/640.json').text], // create topic
-                ["GET", getClass().getResource('/313-initial.json').text], // return fully populated topic as confirmation of the create
-                ["GET", getClass().getResource('/313-initial.json').text], // return fully populated topic as preparation for the update
-                ["POST", getClass().getResource('/641.json').text], // create comment 1
-                ["POST", getClass().getResource('/642.json').text], // create comment 2
-                ["POST", getClass().getResource('/643.json').text], // create comment 3
-                ["POST", getClass().getResource('/644.json').text], // create comment 4
-                ["POST", getClass().getResource('/645.json').text], // create comment 5
-                ["PUT", getClass().getResource('/313-after-put.json').text], // update topic with comments
-                ["GET", getClass().getResource('/313-final.json').text] // retrieve the final topic with all comments
+                ["POST", getClass().getResource('/json/640.json').text], // create topic
+                ["GET", getClass().getResource('/json/313-initial.json').text], // return fully populated topic as confirmation of the create
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/313-initial.json').text], // return fully populated topic as preparation for the update
+                ["POST", getClass().getResource('/json/641.json').text], // create comment 1
+                ["POST", getClass().getResource('/json/642.json').text], // create comment 2
+                ["POST", getClass().getResource('/json/643.json').text], // create comment 3
+                ["POST", getClass().getResource('/json/644.json').text], // create comment 4
+                ["POST", getClass().getResource('/json/645.json').text], // create comment 5
+                ["PUT", getClass().getResource('/json/313-after-put.json').text], // update topic with comments
+                ["GET", getClass().getResource('/json/313-final.json').text] // retrieve the final topic with all comments
 
         ]
 
@@ -284,7 +338,7 @@ class DiscourseApiTest extends Specification {
         BasicHubIssue hubIssue = new BasicHubIssue()
         hubIssue.summary = "Create topic with comments from a hubIssue " + System.currentTimeMillis()
         hubIssue.description = "This is a test case to creating a topic with comments from a hubIssue"
-        TopicReplica.addCategory(hubIssue, "4")
+        TopicReplica.addCategory(hubIssue, 4, "General")
 
         5.times { Integer counter ->
             hubIssue.comments.add(TopicTestUtil.someComment("This is a test comment number ${counter} " + System.currentTimeMillis()))
@@ -309,16 +363,17 @@ class DiscourseApiTest extends Specification {
         // the methodBodyPairs contains the method and the json response for each step in handling an update
 
         List<List<String>> methodBodyPairs = [
-                ["POST", getClass().getResource('/646.json').text], // create topic
-                ["GET", getClass().getResource('/314-initial.json').text], // return fully populated topic as confirmation of the create
-                ["GET", getClass().getResource('/314-initial.json').text], // return fully populated topic as preparation for the update
-                ["PUT", getClass().getResource('/314-after-put.json').text], // update the tag
-                ["GET", getClass().getResource('/314-final.json').text], // create comment 2
-                ["POST", getClass().getResource('/643.json').text], // create comment 3
-                ["POST", getClass().getResource('/644.json').text], // create comment 4
-                ["POST", getClass().getResource('/645.json').text], // create comment 5
-                ["PUT", getClass().getResource('/313-after-put.json').text], // update topic with comments
-                ["GET", getClass().getResource('/313-final.json').text] // retrieve the final topic with all comments
+                ["POST", getClass().getResource('/json/646.json').text], // create topic
+                ["GET", getClass().getResource('/json/314-initial.json').text], // return fully populated topic as confirmation of the create
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/314-initial.json').text], // return fully populated topic as preparation for the update
+                ["PUT", getClass().getResource('/json/314-after-put.json').text], // update the tag
+                ["GET", getClass().getResource('/json/314-final.json').text], // create comment 2
+                ["POST", getClass().getResource('/json/643.json').text], // create comment 3
+                ["POST", getClass().getResource('/json/644.json').text], // create comment 4
+                ["POST", getClass().getResource('/json/645.json').text], // create comment 5
+                ["PUT", getClass().getResource('/json/313-after-put.json').text], // update topic with comments
+                ["GET", getClass().getResource('/json/313-final.json').text] // retrieve the final topic with all comments
 
         ]
 
@@ -347,7 +402,7 @@ class DiscourseApiTest extends Specification {
     def "search since now returns empty page response as there are no topics created after now"() {
         given:
         List<List<String>> methodBodyPairs = [
-                ["GET", getClass().getResource('/search-01.json').text], // return a list of topics and posts that are matching any query
+                ["GET", getClass().getResource('/json/search-01.json').text], // return a list of topics and posts that are matching any query
         ]
 
         mockHttpResponses(methodBodyPairs)
@@ -369,7 +424,7 @@ class DiscourseApiTest extends Specification {
     def "search query is safely escaped"() {
         given:
         List<List<String>> methodBodyPairs = [
-                ["GET", getClass().getResource('/search-01.json').text], // return a list of topics and posts that are matching any query
+                ["GET", getClass().getResource('/json/search-01.json').text], // return a list of topics and posts that are matching any query
         ]
 
         mockHttpResponses(methodBodyPairs)
@@ -391,7 +446,7 @@ class DiscourseApiTest extends Specification {
     def "A trigger is returning the expected topics "() {
         given:
         List<List<String>> methodBodyPairs = [
-                ["GET", getClass().getResource('/search-02.json').text], // return a list of topics and posts that are matching any query
+                ["GET", getClass().getResource('/json/search-02.json').text], // return a list of topics and posts that are matching any query
         ]
 
 
@@ -414,7 +469,7 @@ class DiscourseApiTest extends Specification {
     def "A trigger is returning the expected topics with a tag"() {
         given:
         List<List<String>> methodBodyPairs = [
-                ["GET", getClass().getResource('/search-03.json').text], // return a list of topics and posts that are matching any query
+                ["GET", getClass().getResource('/json/search-03.json').text], // return a list of topics and posts that are matching any query
         ]
 
         mockHttpResponses(methodBodyPairs)
@@ -433,9 +488,191 @@ class DiscourseApiTest extends Specification {
         result.results.size() == 1
     }
 
+    def "The replica of a topic with one post with one attachment lists the single attachment in the attachments list"() {
+        given:
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/json/317.json').text], // return a list of topics and posts that are matching any query
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f-meta.json').text], // return a list of topics and posts that are matching any query
+        ]
+        mockHttpResponses(methodBodyPairs)
 
-    // TODO: Support attachments
-    def "uploadFile throws IssueTrackerException"() {
-        assert true
+        BasicIssueKey entityKey = new BasicIssueKey("317", "317", "topic")
+
+        when:
+        IHubIssueReplica result = discourseApi.readEntity(entityKey)
+
+        then:
+        result.attachments.size() == 1
     }
+
+    def "The replica of a topic with one post with two attachments lists the two attachments in the attachments list"() {
+        given:
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/json/319.json').text], // return a list of topics and posts that are matching any query["GET", getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f-meta.json').text], // return a list of topics and posts that are matching any query
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f-meta.json').text], // return a list of topics and posts that are matching any query
+        ]
+        mockHttpResponses(methodBodyPairs)
+
+        BasicIssueKey entityKey = new BasicIssueKey("319", "319", "topic")
+
+        when:
+        IHubIssueReplica result = discourseApi.readEntity(entityKey)
+
+        then:
+        result.attachments.size() == 1
+    }
+
+    def "The replica of a topic with two attachments in the description and 3 posts with one identical attachment results in 2 attachments"() {
+        given:
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/json/320.json').text],
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/fca98506638111b38fc57bb49ed7ac6384a66567-meta.json').text], // return a list of topics and posts that are matching any query
+                ["GET", getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f-meta.json').text], // return a list of topics and posts that are matching any query
+
+        ]
+        mockHttpResponses(methodBodyPairs)
+
+        BasicIssueKey entityKey = new BasicIssueKey("320", "320", "topic")
+
+        when:
+        IHubIssueReplica result = discourseApi.readEntity(entityKey)
+
+        then:
+        result.attachments.size() == 2
+        result.comments.size() == 3
+    }
+
+    def "The download of a certain attachment contains what we expect"() {
+        given:
+        def imageBytes = getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f.jpeg').bytes
+        def byteString = ByteString.fromArray(imageBytes)
+        def source = Source.single(byteString)
+
+        def mockResponseDownload = new StreamingGroovyHttpResponse(
+                200,
+                [:],
+                source
+        )
+
+        httpClient.download(_ as GroovyHttpRequest) >> mockResponseDownload
+
+        BasicIssueKey entityKey = new BasicIssueKey("319", "319", "topic")
+
+        when:
+        Source<ByteString, ?> result = discourseApi.getFileBodyStream("1117b3d1cd715f2a4c56408a4cec986285a55d8f.jpeg", entityKey, null)
+
+        then:
+        result != null
+    }
+
+    def "The download of an attachment that doesn't exists results in an exception"() {
+        given:
+
+
+        def mockResponse = new StreamingGroovyHttpResponse(
+                404,
+                [:],
+                null
+        )
+
+        httpClient.download(_ as GroovyHttpRequest) >> mockResponse
+
+        BasicIssueKey entityKey = new BasicIssueKey("319", "319", "topic")
+
+        when:
+        Source<ByteString, ?> result = discourseApi.getFileBodyStream("blurb.jpeg", entityKey, null)
+
+        then:
+        thrown(DiscourseClientException)
+    }
+
+    def "A post with a single attachment is reporting the correct filesize and mimetype"() {
+        given:
+
+
+        def fileMetaHeaders = [
+                "content-length":["237202"],
+                "Content-Type":["image/jpeg"],
+        ]
+
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/json/319.json').text],
+                ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", null, fileMetaHeaders],  // return the headers which are expected at this stage of the test.
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+
+
+        BasicIssueKey entityKey = new BasicIssueKey("319", "319", "topic")
+
+        when:
+        IHubIssueReplica result = discourseApi.readEntity(entityKey)
+
+        then:
+        result != null
+        result.attachments.size() == 1
+        result.attachments[0].filename == "1117b3d1cd715f2a4c56408a4cec986285a55d8f.jpeg"
+        result.attachments[0].filesize == 237202
+        result.attachments[0].mimetype == "image/jpeg"
+    }
+
+    def "The download of a certain attachment contains what we expect"() {
+        given:
+        def imageBytes = getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f.jpeg').bytes
+        def byteString = ByteString.fromArray(imageBytes)
+        def source = Source.single(byteString)
+
+        def mockResponseDownload = new StreamingGroovyHttpResponse(
+                200,
+                [:],
+                source
+        )
+
+        httpClient.download(_ as GroovyHttpRequest) >> mockResponseDownload
+
+        BasicIssueKey entityKey = new BasicIssueKey("319", "319", "topic")
+
+        when:
+        Source<ByteString, ?> result = discourseApi.getFileBodyStream("1117b3d1cd715f2a4c56408a4cec986285a55d8f.jpeg", entityKey, null)
+
+        then:
+        result != null
+    }
+
+    def "The download of an attachment that doesn't exists results in an exception"() {
+        given:
+
+
+        def mockResponse = new StreamingGroovyHttpResponse(
+                404,
+                [:],
+                null
+        )
+
+        httpClient.download(_ as GroovyHttpRequest) >> mockResponse
+
+        BasicIssueKey entityKey = new BasicIssueKey("319", "319", "topic")
+
+        when:
+        Source<ByteString, ?> result = discourseApi.getFileBodyStream("blurb.jpeg", entityKey, null)
+
+        then:
+        thrown(DiscourseClientException)
+    }
+
+
+
+//    def "A write Entity of a replica which contains addedAttachments result in an upload of the attachment to discourse"() {
+//        given:
+//
+//
+//        when:
+//        then:
+//    }
+
 }

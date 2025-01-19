@@ -23,8 +23,12 @@
 
 package customconnectornode.discourse.http
 
+import com.exalate.domain.http.AGroovyHttpRequest
+import com.exalate.domain.http.AGroovyHttpResponse
 import com.exalate.domain.http.GroovyHttpRequest
 import com.exalate.domain.http.GroovyHttpResponse
+import com.exalate.domain.http.MultiPartUploadGroovyHttpRequest
+import com.exalate.domain.http.StreamingGroovyHttpResponse
 import com.exalate.replication.services.issuetracker.HttpClient
 import customconnectornode.discourse.api.DiscourseClient
 import groovy.json.JsonBuilder
@@ -45,7 +49,7 @@ import org.slf4j.LoggerFactory
  */
 class DiscourseClientImpl implements DiscourseClient {
 
-    private static final Logger log = LoggerFactory.getLogger(DiscourseClientImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DiscourseClientImpl.class)
     // Logger for recording debug information
 
     private final HttpClient httpClient; // HTTP client for making requests
@@ -59,7 +63,7 @@ class DiscourseClientImpl implements DiscourseClient {
      * @return The value of the parameter or null if not defined.
      */
     private static String getParameter(String key) {
-        return System.getProperty(key) ?: System.getenv(key);
+        return System.getProperty(key) ?: System.getenv(key)
     }
 
     /**
@@ -72,7 +76,7 @@ class DiscourseClientImpl implements DiscourseClient {
         this.baseUrl = getParameter("TRACKER_URL");
         this.httpClient = hc;
 
-        log.debug("DiscourseClientImpl created with baseUrl: ${baseUrl}");
+        log.debug("DiscourseClientImpl created with baseUrl: ${baseUrl}")
     }
 
     /**
@@ -80,8 +84,8 @@ class DiscourseClientImpl implements DiscourseClient {
      *
      * @param request The HTTP request being sent.
      */
-    private static void logRequest(GroovyHttpRequest request) {
-        log.debug("Request: {} {}", request.method, request.url);
+    private static void logRequest(AGroovyHttpRequest request) {
+        log.debug("Request: {} {}", request.method, request.url)
     }
 
     /**
@@ -93,20 +97,47 @@ class DiscourseClientImpl implements DiscourseClient {
      * @param response The HTTP response to validate.
      * @throws DiscourseClientException if an error occurs in the response.
      */
-    private static void checkResponse(GroovyHttpRequest request, GroovyHttpResponse response) {
-        log.debug("Response status: {}", response.code);
-        log.debug("Response body: {} ...", response.bodyString.take(50));
+    private static void checkResponse(AGroovyHttpRequest request, AGroovyHttpResponse response) {
+        if (!response) {
+            throw new DiscourseClientException("Response for ${request.method} request ${request.url} is null")
+        }
+
+        log.debug("Response status: {} for {} {}", response.code, request.method,request.url)
+
 
         // Check for HTTP error codes
         if (response.code >= 400) {
-            log.debug("Got a failure response (${response.code}) while requesting ${request.method} ${request.url}");
-            throw new DiscourseClientException("Error ${response.code} for ${request.method} ${request.url}");
+            log.debug("Got a failure response (${response.code}) while requesting ${request.method} ${request.url}")
+            log.debug("Response body: {} ....", response.bodyString.take(100))
+            throw new DiscourseClientException("Error ${response.code} for ${request.method} ${request.url}<br>Resulting in '<b>${response.bodyString.take(100)}</b>'<br>")
         }
 
         // Validate response body
         if (!response.bodyString) {
-            log.debug("Response bodyString is empty");
-            throw new DiscourseClientException("Response bodyString is empty");
+            log.debug("Response body    String is empty")
+            throw new DiscourseClientException("Response bodyString is empty")
+        }
+    }
+
+    private static void checkResponse(GroovyHttpRequest request, StreamingGroovyHttpResponse response) {
+        if (!response || !response.source) {
+            throw new DiscourseClientException("Response for ${request.method} request ${request.url} is null ")
+        }
+
+        log.debug("Response status: {}", response.code)
+       //
+
+        // Check for HTTP error codes
+        if (response.code >= 400) {
+            log.debug("Got a failure response (${response.code}) while requesting ${request.method} ${request.url}")
+            log.debug("Response source: {} ...", response.source.take(100))
+            throw new DiscourseClientException("Error ${response.code} for ${request.method} ${request.url} resulting in <b>${response.source.take(100)}</b>")
+        }
+
+        // Validate response body
+        if (!response.source) {
+            log.debug("Response source is empty")
+            throw new DiscourseClientException("Response source is empty")
         }
     }
 
@@ -118,20 +149,20 @@ class DiscourseClientImpl implements DiscourseClient {
      * @return The fully constructed URI as a string.
      */
     String buildUri(String path, Map<String, List<String>> params = [:]) {
-        def uri = new StringBuilder(baseUrl);
+        def uri = new StringBuilder(baseUrl)
         if (!path.startsWith('/')) {
-            uri.append('/');
+            uri.append('/')
         }
-        uri.append(path);
+        uri.append(path)
 
         if (params) {
-            uri.append('?');
+            uri.append('?')
             uri.append(params.collect { key, value ->
                 "${URLEncoder.encode(key.toString(), 'UTF-8')}=${URLEncoder.encode(value.toString(), 'UTF-8')}"
-            }.join('&'));
+            }.join('&'))
         }
 
-        return uri.toString();
+        return uri.toString()
     }
 
     /**
@@ -147,6 +178,16 @@ class DiscourseClientImpl implements DiscourseClient {
         return headers;
     }
 
+    private Map<String, List<String>> getHeaders(String contentType) {
+        Map<String, List<String>> headers = new HashMap<>()
+        headers.put('Api-Key', [apiKey])
+        headers.put('Api-Username', [apiUsername])
+        headers.put('Content-Type', [ contentType ])
+        headers.put('Accept', ['*/*'])
+        return headers
+    }
+
+
     /**
      * Sends a GET request to the specified Discourse API endpoint and retrieves a parsed JSON
      * response.
@@ -157,12 +198,20 @@ class DiscourseClientImpl implements DiscourseClient {
      */
     @Override
     Map get(String path, Map<String, List<String>> params = [:]) {
-        GroovyHttpRequest request = new GroovyHttpRequest("GET", buildUri(path, params), null, params, getHeaders());
-        GroovyHttpResponse response = httpClient.http(request);
-        checkResponse(request, response);
-        return response?.bodyString ? jsonSlurper.parseText(response.bodyString) as Map : null;
+        GroovyHttpRequest request = new GroovyHttpRequest("GET", buildUri(path, params), null, params, getHeaders())
+        GroovyHttpResponse response = httpClient.http(request)
+        checkResponse(request, response)
+        return response?.bodyString ? jsonSlurper.parseText(response.bodyString) as Map : null
     }
 
+
+    @Override
+    Map getResponseHeaders(String path, Map<String, List<String>> params = [:]) {
+        GroovyHttpRequest request = new GroovyHttpRequest("GET", buildUri(path, params), null, params, getHeaders())
+        GroovyHttpResponse response = httpClient.http(request)
+        checkResponse(request, response)
+        return response?.headers
+    }
     /**
      * Sends a POST request with a JSON body to the specified Discourse API endpoint.
      *
@@ -173,12 +222,12 @@ class DiscourseClientImpl implements DiscourseClient {
      */
     @Override
     Map post(String path, Object body, Map<String, List<String>> params = [:]) {
-        String jsonBody = new JsonBuilder(body).toString();
-        GroovyHttpRequest request = new GroovyHttpRequest("POST", buildUri(path, params), jsonBody, params, getHeaders());
-        logRequest(request);
-        GroovyHttpResponse response = httpClient.http(request);
-        checkResponse(request, response);
-        return jsonSlurper.parseText(response.bodyString) as Map;
+        String jsonBody = new JsonBuilder(body).toString()
+        GroovyHttpRequest request = new GroovyHttpRequest("POST", buildUri(path, params), jsonBody, params, getHeaders())
+        logRequest(request)
+        GroovyHttpResponse response = httpClient.http(request)
+        checkResponse(request, response)
+        return jsonSlurper.parseText(response.bodyString) as Map
     }
 
     /**
@@ -191,11 +240,44 @@ class DiscourseClientImpl implements DiscourseClient {
      */
     @Override
     Map doPut(String path, Object body, Map<String, List<String>> params = [:]) {
-        String jsonBody = new JsonBuilder(body).toString();
-        GroovyHttpRequest request = new GroovyHttpRequest("PUT", buildUri(path, params), jsonBody, params, getHeaders());
-        logRequest(request);
-        GroovyHttpResponse response = httpClient.http(request);
-        checkResponse(request, response);
-        return jsonSlurper.parseText(response.bodyString) as Map;
+        String jsonBody = new JsonBuilder(body).toString()
+        GroovyHttpRequest request = new GroovyHttpRequest("PUT", buildUri(path, params), jsonBody, params, getHeaders())
+        logRequest(request)
+        GroovyHttpResponse response = httpClient.http(request)
+        checkResponse(request, response)
+        return jsonSlurper.parseText(response.bodyString) as Map
     }
+
+
+    StreamingGroovyHttpResponse download(String path) {
+        GroovyHttpRequest request = new GroovyHttpRequest("GET", buildUri(path,[:]) as String, null, [:], getHeaders())
+
+        logRequest(request)
+        StreamingGroovyHttpResponse response = httpClient.download(request)
+        checkResponse(request, response as StreamingGroovyHttpResponse)
+        return response
+
+    }
+
+    Map uploadAttachment(List<MultiPartUploadGroovyHttpRequest.IFormPart> parts) {
+        String path = "/uploads.json"
+        Map<String, List<String>> params = [:]
+
+        Map<String, List<String>> headers = getHeaders("multipart/form-data")
+        headers.remove("Content-Type")
+
+        MultiPartUploadGroovyHttpRequest request = new MultiPartUploadGroovyHttpRequest(
+                "POST",
+                buildUri(path, params),
+                parts,
+                params,
+                headers
+        )
+
+        logRequest(request)
+        GroovyHttpResponse response = httpClient.uploadMultiPart(request)
+        checkResponse(request, response)
+        return jsonSlurper.parseText(response.bodyString) as Map
+    }
+
 }

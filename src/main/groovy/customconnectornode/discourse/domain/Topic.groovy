@@ -187,6 +187,11 @@ class Topic {
         ObjectMapper mapper = new ObjectMapper()
         Topic topic = mapper.convertValue(topicData, Topic.class)
 
+        if (!topic) {
+            log.error("Failed to create Topic from JSON data: $topicData")
+            return null
+        }
+
         // Process nested field `post_stream.posts` and convert to Post objects.
         if (topic.post_stream && topic.post_stream.posts) {
             topic.posts = topic.post_stream.posts.collect { postData ->

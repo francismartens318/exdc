@@ -1,0 +1,501 @@
+{
+  "post_stream": {
+    "posts": [
+      {
+        "id": 713,
+        "name": "system",
+        "username": "system",
+        "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+        "created_at": "2025-02-12T05:50:07.098Z",
+        "cooked": "<p>ExDC - 0212 - Take 1 - long enough description<br>\nExDC - 0212 - Take 1 - long enough description</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "updated_at": "2025-02-12T05:50:07.098Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 1,
+        "readers_count": 0,
+        "score": 0,
+        "yours": true,
+        "topic_id": 331,
+        "topic_slug": "exdc-0212-take-1-long-enough-summary",
+        "display_username": "system",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "version": 1,
+        "can_edit": true,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": true,
+        "can_wiki": true,
+        "read": true,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [
+          {
+            "id": 3,
+            "can_act": true
+          },
+          {
+            "id": 4,
+            "can_act": true
+          },
+          {
+            "id": 8,
+            "can_act": true
+          },
+          {
+            "id": 10,
+            "can_act": true
+          },
+          {
+            "id": 7,
+            "can_act": true
+          }
+        ],
+        "moderator": true,
+        "admin": true,
+        "staff": true,
+        "user_id": -1,
+        "hidden": false,
+        "trust_level": 4,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "reviewable_id": 0,
+        "reviewable_score_count": 0,
+        "reviewable_score_pending_count": 0
+      }
+    ],
+    "stream": [
+      713
+    ]
+  },
+  "timeline_lookup": [
+    [
+      1,
+      0
+    ]
+  ],
+  "suggested_topics": [
+    {
+      "id": 330,
+      "title": "Exdc test 0211 - take 1 - long enough summary",
+      "fancy_title": "Exdc test 0211 - take 1 - long enough summary",
+      "slug": "exdc-test-0211-take-1-long-enough-summary",
+      "posts_count": 6,
+      "reply_count": 0,
+      "highest_post_number": 6,
+      "image_url": null,
+      "created_at": "2025-02-11T05:45:01.968Z",
+      "last_posted_at": "2025-02-11T06:10:41.117Z",
+      "bumped": true,
+      "bumped_at": "2025-02-11T06:10:41.117Z",
+      "archetype": "regular",
+      "unseen": false,
+      "last_read_post_number": 5,
+      "unread": 0,
+      "new_posts": 1,
+      "unread_posts": 1,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "notification_level": 3,
+      "bookmarked": false,
+      "liked": false,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 2,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": null,
+          "description": "Original Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        },
+        {
+          "extras": "latest",
+          "description": "Most Recent Poster",
+          "user": {
+            "id": 1,
+            "username": "admin",
+            "name": "Francis Martens",
+            "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+            "admin": true,
+            "trust_level": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": 300,
+      "title": "Create topic with comments from a hubIssue1735832846887",
+      "fancy_title": "Create topic with comments from a hubIssue1735832846887",
+      "slug": "create-topic-with-comments-from-a-hubissue1735832846887",
+      "posts_count": 2,
+      "reply_count": 0,
+      "highest_post_number": 2,
+      "image_url": null,
+      "created_at": "2025-01-02T15:47:27.541Z",
+      "last_posted_at": "2025-01-19T21:21:11.723Z",
+      "bumped": true,
+      "bumped_at": "2025-01-19T21:21:11.723Z",
+      "archetype": "regular",
+      "unseen": false,
+      "last_read_post_number": 1,
+      "unread": 0,
+      "new_posts": 1,
+      "unread_posts": 1,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "notification_level": 3,
+      "bookmarked": false,
+      "liked": false,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 3,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": null,
+          "description": "Original Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        },
+        {
+          "extras": "latest",
+          "description": "Most Recent Poster",
+          "user": {
+            "id": 1,
+            "username": "admin",
+            "name": "Francis Martens",
+            "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+            "admin": true,
+            "trust_level": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": 311,
+      "title": "Create topic with comments from a hubIssue1735853924946",
+      "fancy_title": "Create topic with comments from a hubIssue1735853924946",
+      "slug": "create-topic-with-comments-from-a-hubissue1735853924946",
+      "posts_count": 11,
+      "reply_count": 0,
+      "highest_post_number": 11,
+      "image_url": null,
+      "created_at": "2025-01-02T21:38:45.812Z",
+      "last_posted_at": "2025-01-04T15:22:30.304Z",
+      "bumped": true,
+      "bumped_at": "2025-01-04T15:22:30.304Z",
+      "archetype": "regular",
+      "unseen": false,
+      "last_read_post_number": 6,
+      "unread": 0,
+      "new_posts": 5,
+      "unread_posts": 5,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "notification_level": 3,
+      "bookmarked": false,
+      "liked": false,
+      "tags": [],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 3,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": null,
+          "description": "Original Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png",
+            "admin": true,
+            "moderator": true,
+            "trust_level": 4
+          }
+        },
+        {
+          "extras": "latest",
+          "description": "Most Recent Poster",
+          "user": {
+            "id": 1,
+            "username": "admin",
+            "name": "Francis Martens",
+            "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+            "admin": true,
+            "trust_level": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": 317,
+      "title": "Topic to be picked up by the trigger - to check the traces",
+      "fancy_title": "Topic to be picked up by the trigger - to check the traces",
+      "slug": "topic-to-be-picked-up-by-the-trigger-to-check-the-traces",
+      "posts_count": 6,
+      "reply_count": 0,
+      "highest_post_number": 6,
+      "image_url": null,
+      "created_at": "2025-01-04T17:12:47.207Z",
+      "last_posted_at": "2025-01-19T20:29:59.588Z",
+      "bumped": true,
+      "bumped_at": "2025-01-19T20:29:59.588Z",
+      "archetype": "regular",
+      "unseen": false,
+      "last_read_post_number": 5,
+      "unread": 0,
+      "new_posts": 1,
+      "unread_posts": 1,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "notification_level": 2,
+      "bookmarked": false,
+      "liked": false,
+      "tags": [
+        "tag-tester"
+      ],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 3,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 1,
+            "username": "admin",
+            "name": "Francis Martens",
+            "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+            "admin": true,
+            "trust_level": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": 316,
+      "title": "New topic that needs to be picked up by the trigger - but without duplication of comments",
+      "fancy_title": "New topic that needs to be picked up by the trigger - but without duplication of comments",
+      "slug": "new-topic-that-needs-to-be-picked-up-by-the-trigger-but-without-duplication-of-comments",
+      "posts_count": 6,
+      "reply_count": 0,
+      "highest_post_number": 6,
+      "image_url": null,
+      "created_at": "2025-01-04T16:48:57.726Z",
+      "last_posted_at": "2025-01-04T17:07:28.364Z",
+      "bumped": true,
+      "bumped_at": "2025-01-04T17:07:28.364Z",
+      "archetype": "regular",
+      "unseen": false,
+      "last_read_post_number": 4,
+      "unread": 0,
+      "new_posts": 2,
+      "unread_posts": 2,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "notification_level": 2,
+      "bookmarked": false,
+      "liked": false,
+      "tags": [
+        "spock",
+        "tag-tester"
+      ],
+      "tags_descriptions": {},
+      "like_count": 0,
+      "views": 1,
+      "category_id": 4,
+      "featured_link": null,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 1,
+            "username": "admin",
+            "name": "Francis Martens",
+            "avatar_template": "/letter_avatar_proxy/v4/letter/a/3ec8ea/{size}.png",
+            "admin": true,
+            "trust_level": 1
+          }
+        }
+      ]
+    }
+  ],
+  "tags": [],
+  "tags_descriptions": {},
+  "id": 331,
+  "title": "ExDC - 0212 - Take 1 - long enough summary",
+  "fancy_title": "ExDC - 0212 - Take 1 - long enough summary",
+  "posts_count": 1,
+  "created_at": "2025-02-12T05:50:06.993Z",
+  "views": 0,
+  "reply_count": 0,
+  "like_count": 0,
+  "last_posted_at": "2025-02-12T05:50:07.098Z",
+  "visible": true,
+  "closed": false,
+  "archived": false,
+  "has_summary": false,
+  "archetype": "regular",
+  "slug": "exdc-0212-take-1-long-enough-summary",
+  "category_id": 4,
+  "word_count": 14,
+  "deleted_at": null,
+  "user_id": -1,
+  "featured_link": null,
+  "pinned_globally": false,
+  "pinned_at": null,
+  "pinned_until": null,
+  "image_url": null,
+  "slow_mode_seconds": 0,
+  "draft": null,
+  "draft_key": "topic_331",
+  "draft_sequence": 0,
+  "posted": true,
+  "unpinned": null,
+  "pinned": false,
+  "current_post_number": 1,
+  "highest_post_number": 1,
+  "last_read_post_number": 1,
+  "last_read_post_id": 713,
+  "deleted_by": null,
+  "has_deleted": false,
+  "actions_summary": [
+    {
+      "id": 4,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 8,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 10,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    },
+    {
+      "id": 7,
+      "count": 0,
+      "hidden": false,
+      "can_act": true
+    }
+  ],
+  "chunk_size": 20,
+  "bookmarked": false,
+  "topic_timer": null,
+  "message_bus_last_id": 1,
+  "participant_count": 1,
+  "show_read_indicator": false,
+  "thumbnails": null,
+  "slow_mode_enabled_until": null,
+  "details": {
+    "can_edit": true,
+    "notification_level": 3,
+    "notifications_reason_id": 1,
+    "can_move_posts": true,
+    "can_delete": true,
+    "can_remove_allowed_users": true,
+    "can_invite_to": true,
+    "can_invite_via_email": true,
+    "can_create_post": true,
+    "can_reply_as_new_topic": true,
+    "can_flag_topic": true,
+    "can_convert_topic": true,
+    "can_review_topic": true,
+    "can_close_topic": true,
+    "can_archive_topic": true,
+    "can_split_merge_topic": true,
+    "can_edit_staff_notes": true,
+    "can_toggle_topic_visibility": true,
+    "can_pin_unpin_topic": true,
+    "can_moderate_category": true,
+    "can_remove_self_id": -1,
+    "participants": [
+      {
+        "id": -1,
+        "username": "system",
+        "name": "system",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/s/bcef8e/{size}.png",
+        "post_count": 1,
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_color": null,
+        "flair_bg_color": null,
+        "flair_group_id": null,
+        "admin": true,
+        "moderator": true,
+        "trust_level": 4
+      }
+    ],
+    "created_by": {
+      "id": -1,
+      "username": "system",
+      "name": "system",
+      "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png"
+    },
+    "last_poster": {
+      "id": -1,
+      "username": "system",
+      "name": "system",
+      "avatar_template": "/uploads/default/original/1X/fcf0dbf75bfbd3982e89a7d015e0ae005fe0e6d0.png"
+    }
+  },
+  "bookmarks": []
+}
