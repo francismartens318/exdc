@@ -65,7 +65,7 @@ if [[ ! -z "${PROXY_HTTPS_HOST}" && ! -z "${PROXY_HTTPS_PORT}" ]]; then
 fi
 
 
-export CUSTOM_CONNECTOR_ALWAYS_RELOAD=true
+#export CUSTOM_CONNECTOR_ALWAYS_RELOAD=true
 
 
 echo "starting Exalate for Custom Connector node"
@@ -85,5 +85,7 @@ echo "-----------------------------------------"
 
 echo "/opt/customconnectornode/install/bin/customconnectornode -J-Xms128M -J-Xmx${CUSTOMCONNECTORNODE_XMX} -Dhttp.port=${PORT} -Dlogger.file=/opt/customconnectornode/install/conf/logback.xml -Dslick.dbs.default.db.url=jdbc:postgresql://${CUSTOMCONNECTORNODE_PG_HOST}/${CUSTOMCONNECTORNODE_PG_DB} -Dslick.dbs.default.db.user=${CUSTOMCONNECTORNODE_PG_USER} -Dslick.dbs.default.db.password=XXXX -DapplyEvolutions.default=true ${PROXYHTTP} ${PROXYHTTPS} ${PROXYENABLE}"
 
+export CLASSPATH=/opt/customconnectornode/install/lib/discourse-api-groovy.jar:$CLASSPATH
 /opt/customconnectornode/install/bin/customconnectornode -J-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -J-Xms128M -J-Xmx${CUSTOMCONNECTORNODE_XMX} -Dhttp.port=${PORT} -Dlogger.file=/opt/customconnectornode/install/conf/logback.xml -Dslick.dbs.default.db.url=jdbc:postgresql://${CUSTOMCONNECTORNODE_PG_HOST}/${CUSTOMCONNECTORNODE_PG_DB} -Dslick.dbs.default.db.user=${CUSTOMCONNECTORNODE_PG_USER} -Dslick.dbs.default.db.password=${CUSTOMCONNECTORNODE_PG_PWD} -DapplyEvolutions.default=true ${PROXYHTTP} ${PROXYHTTPS} ${PROXYENABLE}
+
 
