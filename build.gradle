@@ -27,6 +27,13 @@ allprojects {
 repositories {
     mavenCentral()
     maven { url 'https://repo.grails.org/grails/core' }
+    maven {
+        url 'https://artifactory.exalate.com/artifactory/all'
+        credentials {
+            username = findProperty("artifactoryUsername")
+            password = findProperty("artifactoryPassword")
+        }
+    }
 }
 
 dependencies {
@@ -37,6 +44,9 @@ dependencies {
     implementation 'org.springframework:spring-context:6.1.14'
     implementation 'org.springframework:spring-webflux:6.1.14'
     implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
+    // Fat jar containing all the exalate dependencies
+    implementation 'com.exalate:customconnectornode_2.13:5.22.0-m13'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.apache.groovy:groovy-test:4.0.5'
