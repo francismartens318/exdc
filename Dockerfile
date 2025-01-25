@@ -11,4 +11,8 @@ COPY ccnode/config/customconnectornode /opt/customconnectornode/install/bin/cust
 # Load environment variables from .env file
 ENV CUSTOM_CONNECTOR_API_CLASS_NAME=customconnectornode.discourse.DiscourseApi
 ENV CUSTOM_CONNECTOR_ALWAYS_RELOAD=true
+ENV LOG_FILE_NAME=discoursenode.log
 
+
+# support the expectations of exalate cloud
+RUN ln -s /opt/customconnectornode /opt/discoursenode

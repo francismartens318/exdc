@@ -1,8 +1,12 @@
 <configuration>
+    <variable name="node_type_name" value="customconnectornode" />
+
+    <property name="LOG_FILE" value="${LOG_FILE_NAME:-logfile.log}" />
+
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/opt/customconnectornode/data/logs/customconnectornode.log</file>
+        <file>/opt/customconnectornode/data/logs/${LOG_FILE}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>/opt/customconnectornode/data/logs/snow-log.%i.gz</fileNamePattern>
+            <fileNamePattern>/opt/customconnectornode/data/logs/${LOG_FILE}.%i.gz</fileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>20</maxIndex>
         </rollingPolicy>
@@ -43,7 +47,7 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <variable name="node_type_name" value="customconnectornode" />
+
 
     <logger name="customconnectornode.services" level="DEBUG"/>
 
