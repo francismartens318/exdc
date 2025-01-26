@@ -7,17 +7,18 @@ IMAGE=<the image containing the custom connector node>
 # The main API class that implements the custom connector functionality
 # for instance
 # CUSTOM_CONNECTOR_API_CLASS_NAME=customconnectornode.discourse.DiscourseApi
-# it must start with customconnectornode and reside under the customconnectornode package
+# it must start with customconnectornode and reside under the customconnectornode package until https://exalate.atlassian.net/browse/XLT-6288 is fixed
 
 
 CUSTOM_CONNECTOR_API_CLASS_NAME=<class path to the custom connector API class>
-
+CUSTOM_CONNECTOR_ALWAYS_RELOAD=true
 
 
 #
 # Add here all the environment variables that are needed by the custom connector API class
 # issuetracker authentication information
-# tip - the proxy information is also used for accessing the exalate console
+# tip - the TRACKER_USER and TRACKER_PASSWORD information is also used for accessing the exalate console (
+
 
 # Username for authentication with the issue tracker
 TRACKER_USER=<username>

@@ -21,7 +21,7 @@ services:
     # Change the image tag to the required version
     # Check Release History on docs.exalate.com for an overview
     #
-    image: idalko/discoursenode:0.0.9
+    image: ${IMAGE}
     ports:
       - 5005:5005
       - 9002:9002
@@ -31,6 +31,9 @@ services:
 
     volumes:
       - ./persist/home:/opt/customconnectornode/data
+      - ./config/start-node.sh:/opt/customconnectornode/install/bin/start-node.sh
+      - ./config/logback.xml:/opt/customconnectornode/install/conf/logback.xml
+      - ../src/main/groovy:/opt/customconnectornode/data/scripts
 
 
     environment:
