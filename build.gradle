@@ -65,13 +65,3 @@ test {
 }
 
 
-tasks.register('groovyJar', Jar) {
-    archiveBaseName = 'discourse-api-groovy'
-    from sourceSets.main.groovy
-    include '**/*.groovy'
-    manifest {
-        attributes(
-                'Main-Class': 'customconnectornode.discourse.DiscourseApi'
-        )
-    }
-}
