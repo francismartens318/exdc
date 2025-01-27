@@ -1,6 +1,0 @@
-#
-# Please copy this file to grade.properties and fill in the values.
-#
-
-artifactoryUsername=<your artifactory username>
-artifactoryPassword=<your artifactory password>

@@ -132,6 +132,7 @@ class DiscourseApiTest extends Specification {
             result.key == "7"
             result.summary == "Test Topic to check the test cases"
             result.description == "<p>This topic is to validate the test case</p>"
+//            result.created.toString() == "Mon Dec 23 12:28:09 CET 2024"
 
 
             result.customFields.size() == 1

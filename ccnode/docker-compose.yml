@@ -21,7 +21,8 @@ services:
     # Change the image tag to the required version
     # Check Release History on docs.exalate.com for an overview
     #
-    image: ${IMAGE}
+    image: exalate/discoursenode:0.0.4
+    #platform: linux/amd64
     ports:
       - 5005:5005
       - 9002:9002
@@ -33,12 +34,8 @@ services:
       - ./persist/home:/opt/customconnectornode/data
       - ./config/start-node.sh:/opt/customconnectornode/install/bin/start-node.sh
       - ./config/logback.xml:/opt/customconnectornode/install/conf/logback.xml
-      - ../src/main/groovy:/opt/customconnectornode/data/scripts
-
 
     environment:
-     
-
       - CUSTOMCONNECTORNODE_PG_USER=exalate
       - CUSTOMCONNECTORNODE_PG_PWD=exalate
       - CUSTOMCONNECTORNODE_PG_HOST=database
