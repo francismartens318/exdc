@@ -33,7 +33,7 @@ import com.exalate.api.domain.twintrace.INonPersistentTrace
 import com.exalate.api.exception.CategorizedException
 import com.exalate.basic.domain.BasicIssueKey
 import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
-import com.exalate.replication.services.issuetracker.GroovyHttpClient
+import com.exalate.replication.services.issuetracker.HttpClient
 import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.TopicAccessClient
 import customconnectornode.discourse.domain.Post
@@ -60,7 +60,7 @@ class DiscourseApi implements IIssueTrackerApi {
     private static final Logger log = LoggerFactory.getLogger(DiscourseApi.class)
 
     private final Application application
-    private final GroovyHttpClient groovyHttpClient
+    private final HttpClient httpClient
     private final DiscourseClient discourseClient
     private final TopicAccessClient topicAccessClient
 
@@ -71,8 +71,8 @@ class DiscourseApi implements IIssueTrackerApi {
     DiscourseApi(Application application) {
         log.debug("Constructing customconnectornode.discourse.DiscourseApi")
         this.application = application
-        this.groovyHttpClient = application.injector().instanceOf(GroovyHttpClient.class)
-        this.discourseClient = new DiscourseClientImpl(groovyHttpClient)
+        this.httpClient = application.injector().instanceOf(HttpClient.class)
+        this.discourseClient = new DiscourseClientImpl(httpClient)
         this.topicAccessClient = new TopicAccessClientImpl(discourseClient)
     }
 

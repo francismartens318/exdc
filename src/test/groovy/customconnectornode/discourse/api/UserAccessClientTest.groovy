@@ -25,7 +25,7 @@ package customconnectornode.discourse.api
 
 import com.exalate.domain.http.GroovyHttpRequest
 import com.exalate.domain.http.GroovyHttpResponse
-import com.exalate.replication.services.issuetracker.GroovyHttpClient
+import com.exalate.replication.services.issuetracker.HttpClient
 import customconnectornode.discourse.TestUtils
 import customconnectornode.discourse.domain.User
 import customconnectornode.discourse.http.DiscourseClientImpl
@@ -37,20 +37,20 @@ import java.util.function.Supplier
 class UserAccessClientTest extends Specification {
 
     UserAccessClient userAccessClient
-    GroovyHttpClient groovyHttpClient
+    HttpClient httpClient
 
     def setup() {
         TestUtils.setupSpec()
-        groovyHttpClient = Mock(GroovyHttpClient)
+        httpClient = Mock(HttpClient)
 
-        userAccessClient = new UserAccessClientImpl(new DiscourseClientImpl(groovyHttpClient))
+        userAccessClient = new UserAccessClientImpl(new DiscourseClientImpl(httpClient))
     }
 
 
     private void mockHttpResponses(List<List<String>> methodBodyPairs) {
         Integer requestStep = 0
 
-        groovyHttpClient.http(_ as GroovyHttpRequest) >> { GroovyHttpRequest request ->
+        httpClient.http(_ as GroovyHttpRequest) >> { GroovyHttpRequest request ->
             // assert that the request is what is expected (based on the requestStep) and that the url is valid (based on the regex)
             assert request.method == methodBodyPairs[requestStep][0]
             assert request.url ==~ /^https?:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/\S*)?$/

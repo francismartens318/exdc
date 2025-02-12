@@ -23,7 +23,6 @@
 
 package customconnectornode.discourse
 
-
 import com.exalate.api.domain.IIssueKey
 import com.exalate.api.domain.hubobject.EntityType
 import com.exalate.api.domain.hubobject.IHubIssueReplica
@@ -33,15 +32,13 @@ import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
 import com.exalate.basic.domain.hubobject.v1.BasicHubLabel
 import com.exalate.domain.http.GroovyHttpRequest
 import com.exalate.domain.http.GroovyHttpResponse
-import com.exalate.replication.services.issuetracker.GroovyHttpClient
+import com.exalate.replication.services.issuetracker.HttpClient
 import customconnectornode.discourse.domain.Topic
 import customconnectornode.discourse.domain.TopicTestUtil
 import customconnectornode.discourse.http.DiscourseClientException
 import customconnectornode.discourse.transform.TopicReplica
 import customconnectornode.discourse.transform.Utils
 import customconnectornode.domain.*
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import play.api.Application
 import play.api.inject.Injector
 import spock.lang.Specification
@@ -50,16 +47,13 @@ import spock.lang.Subject
 import java.util.function.Supplier
 
 class DiscourseApiTest extends Specification {
-    private static final Logger log = LoggerFactory.getLogger(DiscourseApiTest.class)
-
-
     @Subject
     DiscourseApi discourseApi
     TopicTestUtil topicTestUtil
 
     Application application
     Injector injector
-    GroovyHttpClient groovyHttpClient
+    HttpClient httpClient
 
     def setup() {
         TestUtils.setupSpec()
@@ -67,8 +61,8 @@ class DiscourseApiTest extends Specification {
         application = Mock(Application)
         injector = Mock(Injector)
         application.injector() >> injector
-        groovyHttpClient = Mock(GroovyHttpClient)
-        injector.instanceOf(GroovyHttpClient.class) >> groovyHttpClient
+        httpClient = Mock(HttpClient)
+        injector.instanceOf(HttpClient.class) >> httpClient
 
         discourseApi = new DiscourseApi(application)
         topicTestUtil = new TopicTestUtil(discourseApi)
@@ -77,7 +71,7 @@ class DiscourseApiTest extends Specification {
     private void mockHttpResponses(List<List<String>> methodBodyPairs) {
         Integer requestStep = 0
 
-        groovyHttpClient.http(_ as GroovyHttpRequest) >> { GroovyHttpRequest request ->
+        httpClient.http(_ as GroovyHttpRequest) >> { GroovyHttpRequest request ->
             // assert that the request is what is expected (based on the requestStep) and that the url is valid (based on the regex)
             assert request.method == methodBodyPairs[requestStep][0]
             assert request.url ==~ /^https?:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/\S*)?$/
@@ -97,15 +91,15 @@ class DiscourseApiTest extends Specification {
 
     def "searchEntityTypes returns correct entity types"() {
         given:
-            String query = "test"
-            PageRequest pageRequest = new PageRequest(0, 10)
+        String query = "test"
+        PageRequest pageRequest = new PageRequest(0, 10)
 
         when:
-            PageResponse<EntityType> result = discourseApi.searchEntityTypes(query, pageRequest)
+        PageResponse<EntityType> result = discourseApi.searchEntityTypes(query, pageRequest)
 
         then:
-            result.results.size() == 1
-            result.results[0].name == "topic"
+        result.results.size() == 1
+        result.results[0].name == "topic"
     }
 
     def "readEntity returns hub issue for valid topic with a number of comments"() {
@@ -121,26 +115,26 @@ class DiscourseApiTest extends Specification {
                 { -> jsonString } as Supplier<Object>
         )
 
-        groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
+        httpClient.http(_ as GroovyHttpRequest) >> mockResponse
 
         when:
-            IHubIssueReplica result = discourseApi.readEntity(entityKey)
+        IHubIssueReplica result = discourseApi.readEntity(entityKey)
 
         then:
 
-            result != null
-            result.key == "7"
-            result.summary == "Test Topic to check the test cases"
-            result.description == "<p>This topic is to validate the test case</p>"
+        result != null
+        result.key == "7"
+        result.summary == "Test Topic to check the test cases"
+        result.description == "<p>This topic is to validate the test case</p>"
 //            result.created.toString() == "Mon Dec 23 12:28:09 CET 2024"
 
 
-            result.customFields.size() == 1
+        result.customFields.size() == 1
 
-            // check category custom field
-            result.customFields["category"]?.name == "Category"
-            result.customFields["category"].id == 1
-            result.customFields["category"].uid == "4"
+        // check category custom field
+        result.customFields["category"]?.name == "Category"
+        result.customFields["category"].id == 1
+        result.customFields["category"].uid == "4"
 
     }
 
@@ -155,7 +149,7 @@ class DiscourseApiTest extends Specification {
                 { -> jsonString } as Supplier<Object>
         )
 
-        groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
+        httpClient.http(_ as GroovyHttpRequest) >> mockResponse
 
         when:
         IHubIssueReplica result = discourseApi.readEntity(entityKey)
@@ -176,13 +170,13 @@ class DiscourseApiTest extends Specification {
                 { -> jsonString } as Supplier<Object>
         )
 
-        groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
+        httpClient.http(_ as GroovyHttpRequest) >> mockResponse
 
         when:
         Boolean result = discourseApi.doesEntityExist(entityKey)
 
         then:
-            result == false
+        result == false
     }
 
     def "doesEntityExist throws exception when asked for something else than a topic"() {
@@ -209,7 +203,7 @@ class DiscourseApiTest extends Specification {
                 { -> jsonString } as Supplier<Object>
         )
 
-        groovyHttpClient.http(_ as GroovyHttpRequest) >> mockResponse
+        httpClient.http(_ as GroovyHttpRequest) >> mockResponse
 
         when:
         Topic testTopic = topicTestUtil.createAndFetchTopic("Update entity")
@@ -231,7 +225,7 @@ class DiscourseApiTest extends Specification {
         result.traces == traces
     }
 
-    def "create a IssueHubObject of type topic with comments and persist it" () {
+    def "create a IssueHubObject of type topic with comments and persist it"() {
         given:
 
 
@@ -267,7 +261,7 @@ class DiscourseApiTest extends Specification {
         result.entity?.comments?.size() == 1
     }
 
-    def  "create a IssueHubObject of type topic with 5 comments and persist it" () {
+    def "create a IssueHubObject of type topic with 5 comments and persist it"() {
         given:
         // the methodBodyPairs contains the method and the json response for each step in handling an update
 
@@ -292,7 +286,7 @@ class DiscourseApiTest extends Specification {
         hubIssue.description = "This is a test case to creating a topic with comments from a hubIssue"
         TopicReplica.addCategory(hubIssue, "4")
 
-        5.times {Integer counter ->
+        5.times { Integer counter ->
             hubIssue.comments.add(TopicTestUtil.someComment("This is a test comment number ${counter} " + System.currentTimeMillis()))
         }
 
@@ -309,7 +303,7 @@ class DiscourseApiTest extends Specification {
 
     }
 
-    def  "update the tags of an existing IssueHubObject" () {
+    def "update the tags of an existing IssueHubObject"() {
         given:
 
         // the methodBodyPairs contains the method and the json response for each step in handling an update
@@ -331,7 +325,6 @@ class DiscourseApiTest extends Specification {
         mockHttpResponses(methodBodyPairs)
 
 
-
         when:
         Topic testTopic = topicTestUtil.createAndFetchTopic("TagTester")
 
@@ -342,7 +335,7 @@ class DiscourseApiTest extends Specification {
 
         List<INonPersistentTrace> traces = []
         List<StreamableFileMetadata> blobMetadataList = []
-        EntityWriteResult result = discourseApi.writeEntity(testTopicReplicaBefore.entityKey,testTopicReplicaBefore , testTopicReplicaAfter, traces, blobMetadataList)
+        EntityWriteResult result = discourseApi.writeEntity(testTopicReplicaBefore.entityKey, testTopicReplicaBefore, testTopicReplicaAfter, traces, blobMetadataList)
 
         then:
         result != null
@@ -400,7 +393,6 @@ class DiscourseApiTest extends Specification {
         List<List<String>> methodBodyPairs = [
                 ["GET", getClass().getResource('/search-02.json').text], // return a list of topics and posts that are matching any query
         ]
-
 
 
         mockHttpResponses(methodBodyPairs)
