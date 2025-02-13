@@ -34,7 +34,7 @@ services:
       - database #wait for postgres to be started, not for ready
 
     volumes:
-      -  /Users/jpgu07/workspace/exdc/build/libs:/opt/customconnectornode/install/lib/external/
+      - ../build/libs:/opt/customconnectornode/install/lib/external/ # This will make the jar available
       - ./persist/home:/opt/customconnectornode/data
       - ./config/start-node.sh:/opt/customconnectornode/install/bin/start-node.sh
       - ./config/logback.xml:/opt/customconnectornode/install/conf/logback.xml
