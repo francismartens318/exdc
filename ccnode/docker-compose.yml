@@ -4,6 +4,8 @@ services:
   database:
     restart: unless-stopped
     image: postgres:12.19
+    ports:
+      - 5432:5432
     volumes:
       - ./persist/db:/var/lib/postgresql/data
       - ./createdb.sh:/docker-entrypoint-initdb.d/init-user-db.sh
@@ -21,7 +23,9 @@ services:
     # Change the image tag to the required version
     # Check Release History on docs.exalate.com for an overview
     #
-    image: ${IMAGE}
+    image: ccnode:0.0.5
+#    command: sleep infinity
+    #platform: linux/amd64
     ports:
       - 5005:5005
       - 9002:9002
@@ -30,15 +34,12 @@ services:
       - database #wait for postgres to be started, not for ready
 
     volumes:
+      - ../build/libs:/opt/customconnectornode/install/lib/external/ # This will make the jar available
       - ./persist/home:/opt/customconnectornode/data
       - ./config/start-node.sh:/opt/customconnectornode/install/bin/start-node.sh
       - ./config/logback.xml:/opt/customconnectornode/install/conf/logback.xml
-      - ../src/main/groovy:/opt/customconnectornode/data/scripts
-
 
     environment:
-     
-
       - CUSTOMCONNECTORNODE_PG_USER=exalate
       - CUSTOMCONNECTORNODE_PG_PWD=exalate
       - CUSTOMCONNECTORNODE_PG_HOST=database

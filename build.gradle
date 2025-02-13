@@ -4,9 +4,15 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.20'
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 kotlin {
     jvmToolchain(17)
 }
+
 
 configurations.configureEach {
     resolutionStrategy {
@@ -38,16 +44,14 @@ repositories {
 
 dependencies {
     // Keep existing dependencies as they are well-configured
-    implementation fileTree(dir: 'lib', include: ['*.jar'])
     implementation 'org.apache.groovy:groovy-all:4.0.5'
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
     implementation 'org.springframework:spring-context:6.1.14'
     implementation 'org.springframework:spring-webflux:6.1.14'
     implementation 'io.github.cdimascio:java-dotenv:5.2.2'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.20"
 
     // Fat jar containing all the exalate dependencies
-    implementation 'com.exalate:customconnectornode_2.13:5.22.0-m13'
+    implementation 'com.exalate:customconnectornode_2.13:5.10.0-CC'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.apache.groovy:groovy-test:4.0.5'
@@ -63,5 +67,3 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
-

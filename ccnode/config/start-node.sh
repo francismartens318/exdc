@@ -5,8 +5,6 @@ DATA_DIR=$HOME_DIR/data
 APP_DIR=$HOME_DIR/install
 SYSCONFIG=/etc/sysconfig/customconnectornode
 
-
-
 # ***********************************************
 
 # stop if no configuration available
@@ -23,9 +21,6 @@ sed -i 's:<logger name="slick.jdbc.JdbcBackend.statement" level="DEBUG"/>:<logge
 if [ "z${SQL_CONTROLLER}" = "zTRUE" ]; then
         sed -i 's:<logger name="slick.jdbc.JdbcBackend.statement" level="ERROR"/>:<logger name="slick.jdbc.JdbcBackend.statement" level="DEBUG"/>:g' $APP_DIR/conf/logback.xml
 fi
-
-
-
 
 PORT=$CUSTOMCONNECTORNODE_PORT
 
@@ -73,17 +68,22 @@ echo "-----------------------------------------"
 echo "+++ Scripts directory"
 ls -lR /opt/customconnectornode/data/scripts/customconnectornode
 
-echo "+++ lib directory"
-ls -lR /opt/customconnectornode/install/lib
+echo "+++ external lib directory"
+ls -lR /opt/customconnectornode/install/lib/external
 
 echo "+++ Environment"
 printenv
 echo "-----------------------------------------"
 
-
-
+if [[ "${CC_DEBUG,,}" == "true" ]]; then
+  DEBUG_OPTS="-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+  echo "Remote debugging enabled on port 5005"
+else
+  DEBUG_OPTS=""
+  echo "Remote debugging disabled"
+fi
 
 echo "/opt/customconnectornode/install/bin/customconnectornode -J-Xms128M -J-Xmx${CUSTOMCONNECTORNODE_XMX} -Dhttp.port=${PORT} -Dlogger.file=/opt/customconnectornode/install/conf/logback.xml -Dslick.dbs.default.db.url=jdbc:postgresql://${CUSTOMCONNECTORNODE_PG_HOST}/${CUSTOMCONNECTORNODE_PG_DB} -Dslick.dbs.default.db.user=${CUSTOMCONNECTORNODE_PG_USER} -Dslick.dbs.default.db.password=XXXX -DapplyEvolutions.default=true ${PROXYHTTP} ${PROXYHTTPS} ${PROXYENABLE}"
-/opt/customconnectornode/install/bin/customconnectornode -J-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -J-Xms128M -J-Xmx${CUSTOMCONNECTORNODE_XMX} -Dhttp.port=${PORT} -Dlogger.file=/opt/customconnectornode/install/conf/logback.xml -Dslick.dbs.default.db.url=jdbc:postgresql://${CUSTOMCONNECTORNODE_PG_HOST}/${CUSTOMCONNECTORNODE_PG_DB} -Dslick.dbs.default.db.user=${CUSTOMCONNECTORNODE_PG_USER} -Dslick.dbs.default.db.password=${CUSTOMCONNECTORNODE_PG_PWD} -DapplyEvolutions.default=true ${PROXYHTTP} ${PROXYHTTPS} ${PROXYENABLE}
 
+/opt/customconnectornode/install/bin/customconnectornode -d -J-Xms128M -J-Xmx${CUSTOMCONNECTORNODE_XMX} ${DEBUG_OPTS} -Dhttp.port=${PORT} -Dlogger.file=/opt/customconnectornode/install/conf/logback.xml -Dslick.dbs.default.db.url=jdbc:postgresql://${CUSTOMCONNECTORNODE_PG_HOST}/${CUSTOMCONNECTORNODE_PG_DB} -Dslick.dbs.default.db.user=${CUSTOMCONNECTORNODE_PG_USER} -Dslick.dbs.default.db.password=${CUSTOMCONNECTORNODE_PG_PWD} -DapplyEvolutions.default=true ${PROXYHTTP} ${PROXYHTTPS} ${PROXYENABLE}
 
