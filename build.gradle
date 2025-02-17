@@ -57,7 +57,7 @@ dependencies {
     implementation 'io.github.cdimascio:java-dotenv:5.2.2'
 
     // Fat jar containing all the exalate dependencies
-    implementation 'com.exalate:customconnectornode_2.13:5.23.0-m16'
+    implementation 'com.exalate:customconnectornode_2.13:5.23.0-m20'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.apache.groovy:groovy-test:4.0.5'

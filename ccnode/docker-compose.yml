@@ -23,7 +23,7 @@ services:
     # Change the image tag to the required version
     # Check Release History on docs.exalate.com for an overview
     #
-    image: ccnode:0.0.7
+    image: ccnode:0.0.8
 #    command: sleep infinity
     #platform: linux/amd64
     ports:
