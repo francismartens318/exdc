@@ -41,6 +41,7 @@ class Utils {
 
         // Try RFC 1123 format first
         SimpleDateFormat formatter = new SimpleDateFormat(RFC1123Pattern, Locale.US)
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"))
 
         try {
             return formatter.parse(dateString)
@@ -67,6 +68,7 @@ class Utils {
         if (!date) return null
 
         SimpleDateFormat formatter = new SimpleDateFormat(datePattern)
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"))
         return formatter.format(date)
     }
 }

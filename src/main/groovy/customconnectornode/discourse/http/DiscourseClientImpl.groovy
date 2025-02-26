@@ -76,7 +76,7 @@ class DiscourseClientImpl implements DiscourseClient {
         this.baseUrl = getParameter("TRACKER_URL");
         this.httpClient = hc;
 
-        log.debug("DiscourseClientImpl created with baseUrl: ${baseUrl}")
+        log.debug("DiscourseClientImpl created with baseUrl : ${baseUrl}")
     }
 
     /**

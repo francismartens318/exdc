@@ -45,6 +45,7 @@ class UtilsTest extends Specification {
 
         then:
         date != null
+        TimeZone.setDefault(TimeZone.getTimeZone("CET"))
         date.toString() == "Sun Jan 26 09:00:53 CET 2025"
     }
 

@@ -1,8 +1,8 @@
 FROM idalko/customconnectornode:5.23.0-m20
 
 #COPY build/libs/exdc.jar /opt/customconnectornode/install/lib/external/exdc.jar
-COPY ccnode/config/start-node.sh /opt/customconnectornode/install/bin/start-node.sh
-COPY ccnode/config/logback.xml /opt/customconnectornode/install/conf/logback.xml
+COPY ./config/start-node.sh /opt/customconnectornode/install/bin/start-node.sh
+COPY ./config/logback.xml /opt/customconnectornode/install/conf/logback.xml
 
 # Load environment variables from ..env file
 ENV CUSTOM_CONNECTOR_ALWAYS_RELOAD=true

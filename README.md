@@ -15,7 +15,12 @@ The Dockerfile includes multi-stage builds to optimize the final image size and 
 1. Clone the repository
 2. Configure environment variables by creating a `.env` file in the ccnode directory. A sample .env file is provided (env_sample)
 3. Configure Gradle properties by creating/updating `gradle.properties` file in the root folder, a sample has been provided.
-4. run a gradle clean build to validate all is setup correctly.  The tests must succeed
+4. Run a gradle clean build to validate all is setup correctly.  The tests must succeed
+5. Make sure that the ccnode container image is available.  It can be build by using
+```
+cd <rootdir>
+docker build --platform linux/amd64 -t ccnode:<sometag> ccnode
+```
 
 You should now have a fully functional development environment, allowing you to create testcases, make them green. Debug, autocomplete and all that jazz must be available
 

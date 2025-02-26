@@ -18,14 +18,16 @@ services:
       - dbnet
 
   ccnode:
-    restart: "no"
+    restart: "unless-stopped"
     #
     # Change the image tag to the required version
     # Check Release History on docs.exalate.com for an overview
     #
     image: ccnode:0.0.8
-#    command: sleep infinity
+
     #platform: linux/amd64
+
+
     ports:
       - 5005:5005
       - 9002:9002
