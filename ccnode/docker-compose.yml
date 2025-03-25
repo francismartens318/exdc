@@ -23,7 +23,7 @@ services:
     # Change the image tag to the required version
     # Check Release History on docs.exalate.com for an overview
     #
-    image: ccnode:0.0.8
+    image: discourse:5.24.0-m12
 
     #platform: linux/amd64
 

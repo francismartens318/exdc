@@ -173,6 +173,8 @@ class DiscourseClientImpl implements DiscourseClient {
      */
     private Map<String, List<String>> getHeaders() {
         Map<String, List<String>> headers = new HashMap<>();
+//        headers.put('Api-Key', [apiKey])
+//        headers.put('Api-Username', [apiUsername])
         headers.put('Content-Type', ['application/json']);
         headers.put('Accept', ['application/json']);
         return headers;
@@ -180,8 +182,8 @@ class DiscourseClientImpl implements DiscourseClient {
 
     private Map<String, List<String>> getHeaders(String contentType) {
         Map<String, List<String>> headers = new HashMap<>()
-        headers.put('Api-Key', [apiKey])
-        headers.put('Api-Username', [apiUsername])
+//        headers.put('Api-Key', [apiKey])
+//        headers.put('Api-Username', [apiUsername])
         headers.put('Content-Type', [ contentType ])
         headers.put('Accept', ['*/*'])
         return headers

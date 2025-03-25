@@ -113,7 +113,7 @@ class DiscourseApiTest extends Specification {
 
         then:
         result.results.size() == 1
-        result.results[0].name == "topic"
+        result.results[0].name == "daniel"
     }
 
     def "readEntity returns hub issue for valid topic with a number of comments"() {
