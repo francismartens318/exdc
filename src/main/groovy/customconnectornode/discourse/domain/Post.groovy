@@ -42,6 +42,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
  * https://docs.discourse.org/
  */
 
+
+// TODO: Cleanout the unused fields
 @CompileStatic
 @Builder
 class Post {

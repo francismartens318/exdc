@@ -133,6 +133,7 @@ class TopicReplica {
 
         replica.entityKey = toEntityKey(topic)
         replica.setEntityUrl(topic.origin_url)
+        replica.accepted_answer = topic.accepted_answer
         return replica
     }
 

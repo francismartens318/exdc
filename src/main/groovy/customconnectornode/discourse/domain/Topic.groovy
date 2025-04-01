@@ -131,7 +131,7 @@ class Topic {
     List timeline_lookup
     String title
     String topic_id
-    String topic_timer
+
     String topic_slug
     Integer trust_level
     String unpinned
@@ -150,11 +150,52 @@ class Topic {
     Integer word_count
     Boolean yours
     String origin_url // not a field in the json
-
+    Map<String, String> accepted_answer
+//TODO - clean the structure of the topic object
     @JsonAnySetter
     Map<String, Object> unknownFields = new HashMap<>()
 
 
+    /**
+     * Identifies if a topic has an accepted/solved answer and creates a standardized acceptance structure.
+     *
+     * The resulting topic will contain an 'accepted' field with:
+     * - username: the user who provided the accepted answer
+     * - displayName: the full name of the user
+     * - date: timestamp when the answer was accepted
+     * - url: full URL to the accepted answer post
+     *
+     * @param topic The Topic object to process
+     * @return The updated Topic with standardized acceptance information
+     */
+    static private Topic identify_if_solved(Topic topic) {
+        if (topic.accepted_answer) {
+            int postNumber = topic.accepted_answer.post_number as int
+
+            if (topic.posts) {
+                Post acceptedPost = topic.posts.find { post ->
+                    post.post_number == postNumber
+                }
+
+                if (acceptedPost) {
+                    String baseUrl = (topic.origin_url ?: '').split('/t')[0]
+                    String postUrl = "${baseUrl}/t/${topic.slug}/${topic.id}/${postNumber}".toString()
+
+                    // add the extra fields from the post
+                    topic.accepted_answer += [
+                            displayName: acceptedPost.display_username,
+                            date: acceptedPost.created_at,
+                            url: postUrl
+                    ]
+
+                    // remove the name field because it is always null and confusing
+                    topic.accepted_answer.remove('name')
+                }
+            }
+        }
+
+        return topic
+    }
     /**
      * Converts the Topic object into a readable string representation.
      *
@@ -200,6 +241,8 @@ class Topic {
         }
         // Assign the source URL for record-keeping if provided.
         topic.origin_url = sourceUrl
+
+        topic = identify_if_solved(topic)
 
         return topic
     }

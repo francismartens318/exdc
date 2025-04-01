@@ -666,13 +666,58 @@ class DiscourseApiTest extends Specification {
     }
 
 
+    def "readEntity returns hub issue where the resolution is accepted"() {
+        given:
+        BasicIssueKey entityKey = new BasicIssueKey("333", "333", "topic")
 
-//    def "A write Entity of a replica which contains addedAttachments result in an upload of the attachment to discourse"() {
-//        given:
-//
-//
-//        when:
-//        then:
-//    }
+
+
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/solved/topic_333.json').text],
+                ["GET", getClass().getResource('/json/categories.json').text],
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+
+        when:
+        IHubIssueReplica result = discourseApi.readEntity(entityKey)
+
+        then:
+
+        result != null
+        result.key == "333"
+        result.accepted_answer != null
+        result.accepted_answer.username == "admin"
+        result.accepted_answer.displayName == "Francis Martens"
+        result.accepted_answer.date == "2025-03-25T23:10:52.984Z"
+        result.accepted_answer.excerpt == "this might be a good solution"
+        result.accepted_answer.url == "https://community.exalate.st/t/exdc-0213-take-1-long-summary/333/4"
+    }
+
+
+    def "readEntity returns hub empty accepted_answer where there is no solution"() {
+        given:
+        BasicIssueKey entityKey = new BasicIssueKey("7", "7", "topic")
+
+
+
+        List<List<String>> methodBodyPairs = [
+                ["GET", getClass().getResource('/solved/topic_7.json').text],
+                ["GET", getClass().getResource('/json/categories.json').text],
+        ]
+
+        mockHttpResponses(methodBodyPairs)
+
+
+        when:
+        IHubIssueReplica result = discourseApi.readEntity(entityKey)
+
+        then:
+
+        result != null
+        result.key == "7"
+        result.accepted_answer == null
+    }
 
 }
