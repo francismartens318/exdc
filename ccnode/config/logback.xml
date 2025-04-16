@@ -52,6 +52,6 @@
     <logger name="customconnectornode.services" level="DEBUG"/>
 
 
-    <root level="INFO"/>
+    <root level="DEBUG"/>
 
 </configuration>

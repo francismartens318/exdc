@@ -1,4 +1,5 @@
-FROM idalko/customconnectornode:5.24.0-m12
+FROM idalko/customconnectornode:5.24.0-m34
+
 
 #COPY build/libs/exdc.jar /opt/customconnectornode/install/lib/external/exdc.jar
 COPY ./config/start-node.sh /opt/customconnectornode/install/bin/start-node.sh

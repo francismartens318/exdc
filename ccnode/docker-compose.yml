@@ -23,7 +23,7 @@ services:
     # Change the image tag to the required version
     # Check Release History on docs.exalate.com for an overview
     #
-    image: discourse:5.24.0-m12
+    image: discourse:5.24.0-m34
 
     #platform: linux/amd64
 
