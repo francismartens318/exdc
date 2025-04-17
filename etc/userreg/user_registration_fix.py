@@ -66,7 +66,7 @@ def insert_user(conn, email, password_hash):
 
         # Insert new user
         cursor.execute(
-            "INSERT INTO users (email, password, status) VALUES (%s, %s, 'ACTIVE') RETURNING id",
+            "INSERT INTO users (email, credentials, status) VALUES (%s, %s, 'ACTIVE') RETURNING id",
             (email, password_hash)
         )
         user_id = cursor.fetchone()[0]
