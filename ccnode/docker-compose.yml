@@ -47,6 +47,8 @@ services:
       - CUSTOMCONNECTORNODE_PG_HOST=database
       - CUSTOMCONNECTORNODE_PG_DB=ccnode
       - CUSTOMCONNECTORNODE_PORT=9002
+      - FEATURE_AI_ASSIST_ENABLED=true
+      - AI_SERVICE_URL=https://ai-service.exalate.cloud
 
       - NODE_SELF_URL=http://localhost:9002
 #      - NODE_SELF_URL=https://exdc-stage.xl8.tech
