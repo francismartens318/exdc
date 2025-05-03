@@ -385,4 +385,27 @@ class TopicReplicaTest extends Specification {
         result.posts.size() > 0
         result.tags.containsAll(["testcase", "spock"])
     }
+
+    def "toReplica should ensure entityUrl does not end with .json"() {
+        given:
+        Topic topic = new Topic().builder()
+                .id(123L)
+                .topic_id("123")
+                .title("Test Topic")
+                .cooked("<p>This is a test topic</p>")
+                .created_at("2024-01-01T12:00:00.000Z")
+                .updated_at("2024-01-02T12:00:00.000Z")
+                .category("General")
+                .category_id(4)
+                .origin_url("https://discourse.example.com/t/test-topic/123.json")
+                .build()
+
+        when:
+        BasicHubIssue result = TopicReplica.toReplica(topic)
+
+        then:
+        result != null
+        result.entityUrl == "https://discourse.example.com/t/test-topic/123"
+        !result.entityUrl.endsWith(".json")
+    }
 }

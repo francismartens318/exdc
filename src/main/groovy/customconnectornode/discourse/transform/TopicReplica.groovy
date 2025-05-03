@@ -132,7 +132,9 @@ class TopicReplica {
                 }
 
         replica.entityKey = toEntityKey(topic)
-        replica.setEntityUrl(topic.origin_url)
+
+        // INTSNS-70 - ensure the url of the entity is the appropriate one
+        replica.setEntityUrl(topic.origin_url?.replaceAll('\\.json$', ''))
         replica.accepted_answer = topic.accepted_answer
         return replica
     }
