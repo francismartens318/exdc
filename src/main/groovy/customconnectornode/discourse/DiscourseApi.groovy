@@ -96,7 +96,7 @@ class DiscourseApi implements IIssueTrackerApi {
         // Return basic topic type for now
         PageResponse<EntityType> response = new PageResponse<EntityType>(
                 pageRequest,
-                [new EntityType("daniel", true, true)],
+                [new EntityType("topic", true, true)],
                 true
         )
         log.debug("Search entity types response : {}", response)
