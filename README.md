@@ -19,7 +19,11 @@ The Dockerfile includes multi-stage builds to optimize the final image size and 
 5. Make sure that the ccnode container image is available.  It can be build by using
 ```
 cd <rootdir>
-docker build --platform linux/amd64 -t ccnode:<sometag> ccnode
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t ccnode:<sometag> \
+  -f ccnode/Dockerfile --load ccnode
+
 ```
 
 You should now have a fully functional development environment, allowing you to create testcases, make them green. Debug, autocomplete and all that jazz must be available
