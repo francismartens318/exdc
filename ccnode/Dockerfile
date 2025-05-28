@@ -1,4 +1,4 @@
-FROM idalko/customconnectornode:5.24.0-m34
+FROM idalko/customconnectornode:5.24.0-m46
 
 
 #COPY build/libs/exdc.jar /opt/customconnectornode/install/lib/external/exdc.jar
@@ -12,3 +12,15 @@ ENV CUSTOM_CONNECTOR_NODE_TYPE="Discourse"
 ENV GENERAL_SETTINGS_ENABLED=true
 ENV USER_SERVICE_FEATURE=true
 ENV CC_DEBUG=true
+
+
+#
+# Build from root folder of the project
+#
+# docker buildx build --platform linux/amd64,linux/arm64 \
+#  -t discoursenode:5.24.0-m46 \
+# -f ccnode/Dockerfile --load ccnode
+#
+# note the tag corresponds to the tag of the customconnectornode
+#
+
