@@ -21,14 +21,14 @@
  *
  */
 
-package customconnectornode.discourse.api
+// package customconnectornode.discourse.api // Commented out
 
 
-import com.exalate.api.domain.twintrace.INonPersistentTrace
-import com.exalate.domain.http.StreamingGroovyHttpResponse
+//import com.exalate.api.domain.twintrace.INonPersistentTrace // Commented out
+//import com.exalate.domain.http.StreamingGroovyHttpResponse // Commented out
 
-import customconnectornode.discourse.domain.Topic
-import customconnectornode.discourse.domain.AttachmentMetaData
+//import customconnectornode.discourse.domain.Topic // Commented out
+//import customconnectornode.discourse.domain.AttachmentMetaData // Commented out
 
 import java.sql.Timestamp
 
@@ -48,7 +48,7 @@ interface TopicAccessClient {
      * @param topicId the unique ID of the topic to retrieve.
      * @return the topic object containing its details.
      */
-    Topic getTopic(String topicId);
+    // Topic getTopic(String topicId); // Commented out
 
     /**
      * Creates a new topic using the provided details (e.g., title, content, and category).
@@ -56,7 +56,7 @@ interface TopicAccessClient {
      * @param topic the topic object containing the necessary data for creation.
      * @return the newly created topic object.
      */
-    Topic create(Topic topic);
+    // Topic create(Topic topic); // Commented out
 
     /**
      * Updates an existing topic with new information (e.g., modified content or metadata).
@@ -66,7 +66,7 @@ interface TopicAccessClient {
      * @param traces a list of non-persistent trace objects to track update changes.
      * @return a map containing the results or status of the update operation.
      */
-    Map<String, Object> update(Topic topic, List<INonPersistentTrace> traces);
+    // Map<String, Object> update(Topic topic, List<INonPersistentTrace> traces); // Commented out
 
     /**
      * Adds a new post or comment to an existing topic.
@@ -85,7 +85,7 @@ interface TopicAccessClient {
      * @param since a timestamp to filter topics created/updated after this time (optional).
      * @return a list of topics that match the search criteria.
      */
-    List<Topic> search(String query, Timestamp since);
+    // List<Topic> search(String query, Timestamp since); // Commented out
 
 
     /**
@@ -96,7 +96,7 @@ interface TopicAccessClient {
      * @return StreamingGroovyHttpResponse containing the downloaded attachment data
      */
 
-    StreamingGroovyHttpResponse downloadAttachment(String fileId)
+    // StreamingGroovyHttpResponse downloadAttachment(String fileId) // Commented out
 
 
     /**
@@ -108,5 +108,5 @@ interface TopicAccessClient {
      * @param fileId
      * @return
      */
-    AttachmentMetaData getAttachmentMetadata(String fileId)
+    // AttachmentMetaData getAttachmentMetadata(String fileId) // Commented out
 }

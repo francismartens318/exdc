@@ -4,42 +4,63 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.exalate.api.domain.IIssueKey
 import com.exalate.api.domain.hubobject.EntityType
+import com.exalate.api.domain.hubobject.IHubIssueReplica
 import com.exalate.basic.domain.BasicIssueKey
 import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
 import com.exalate.domain.http.StreamingGroovyHttpResponse
 import customconnectornode.notion.api.NotionClient
-import customconnectornode.domain.EntityKeyContext
 import customconnectornode.domain.PageRequest
 import customconnectornode.domain.PageResponse
+import org.junit.Before
+import org.junit.Test
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import play.api.Application
-import spock.lang.Specification
-import spock.lang.Subject
-import spock.lang.Unroll // Optional: for parameterized tests if any get added later
 
-// It's good practice to import static methods for Spock if needed, e.g. for interactions
-// import static spock.util.matcher.HamcrestMatchers.closeTo // Example
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
+import static org.junit.Assert.assertTrue
+import static org.mockito.ArgumentMatchers.any
+import static org.mockito.ArgumentMatchers.anyString
+import static org.mockito.ArgumentMatchers.eq
+import static org.mockito.Mockito.verify
+import static org.mockito.Mockito.when
+import static org.mockito.ArgumentMatchers.isNull // Added for isNull()
 
-class NotionApiTest extends Specification {
+class NotionApiTest {
 
-    // Mocks are automatically created by Spock by just declaring them with the Mock() annotation or as fields
-    Application mockApplication = Mock()
-    NotionClient mockNotionClient = Mock()
-    Source<ByteString, ?> mockSource = Mock() // For getFileBodyStream test
-    StreamingGroovyHttpResponse mockStreamingResponse = Mock() // For getFileBodyStream test
+    @Mock
+    private Application mockApplication
+    @Mock
+    private NotionClient mockNotionClient
+    @Mock
+    private Source<ByteString, ?> mockSource // For getFileBodyStream test
+    @Mock
+    private StreamingGroovyHttpResponse mockStreamingResponse // For getFileBodyStream test
 
-    @Subject // Indicates the main object under test
-    NotionApi notionApi
 
-    void setup() {
-        // No need for MockitoAnnotations.initMocks(this)
+    private NotionApi notionApi
+
+    @Captor
+    private ArgumentCaptor<Map<String, Object>> propertiesCaptor
+
+    @Before
+    void setUp() {
+        MockitoAnnotations.initMocks(this)
         notionApi = new NotionApi(mockApplication, "test_api_key")
-        notionApi.notionClient = mockNotionClient // Inject mock client
+        // Inject the mocked NotionClient into NotionApi
+        notionApi.notionClient = mockNotionClient
     }
 
-    def "testReadEntity_Success"() {
-        given: "a page ID and issue key"
+    @Test
+    void testReadEntity_Success() {
+        // Arrange
         String pageId = "test-page-id"
         IIssueKey issueKey = new BasicIssueKey(pageId, "page", "page")
+
         def mockPageData = [
             id: pageId,
             properties: [
@@ -47,74 +68,68 @@ class NotionApiTest extends Specification {
             ]
         ]
 
-        when: "readEntity is called"
-        1 * mockNotionClient.getPage(pageId) >> mockPageData // Spock interaction: 1 call, return mockPageData
+        when(mockNotionClient.getPage(pageId)).thenReturn(mockPageData)
+
+        // Act
         BasicHubIssue result = (BasicHubIssue) notionApi.readEntity(issueKey)
 
-        then: "the result should be correctly mapped"
-        result != null
-        result.key.URN == pageId
-        result.summary == "Test Page Title"
+        // Assert
+        assertNotNull("Result should not be null", result)
+        assertEquals("Page ID should match", pageId, result.key.URN)
+        assertEquals("Summary should match page title", "Test Page Title", result.summary)
     }
 
-    def "testReadEntity_NotFound"() {
-        given: "a non-existent page ID and issue key"
+    @Test
+    void testReadEntity_NotFound() {
+        // Arrange
         String pageId = "non-existent-page-id"
         IIssueKey issueKey = new BasicIssueKey(pageId, "page", "page")
 
-        when: "readEntity is called and client returns null"
-        1 * mockNotionClient.getPage(pageId) >> null
+        when(mockNotionClient.getPage(pageId)).thenReturn(null) // Simulate page not found
+
+        // Act
         BasicHubIssue result = (BasicHubIssue) notionApi.readEntity(issueKey)
 
-        then: "the result should be null"
-        result == null
+        // Assert
+        assertNull("Result should be null when page not found", result)
     }
 
-    def "testSearchEntityTypes_NoQuery"() {
-        given: "a page request"
+    @Test
+    void testSearchEntityTypes_NoQuery() {
         PageRequest pageRequest = new PageRequest(0, 10)
-
-        when: "searchEntityTypes is called with no query"
         PageResponse<EntityType> response = notionApi.searchEntityTypes(null, pageRequest)
 
-        then: "it returns the 'page' entity type"
-        response != null
-        response.getResults().size() == 1
-        response.getResults()[0].getName() == "page"
-        response.getResults()[0].isSyncable() // Spock automatically asserts true for boolean conditions
+        assertNotNull(response)
+        assertEquals("Should return 1 entity type", 1, response.getResults().size())
+        assertEquals("Entity type should be 'page'", "page", response.getResults().get(0).getName())
+        assertTrue("Entity type should be syncable", response.getResults().get(0).isSyncable())
     }
 
-    def "testSearchEntityTypes_WithQuery_Match"() {
-        given: "a page request and a matching query"
+    @Test
+    void testSearchEntityTypes_WithQuery_Match() {
         PageRequest pageRequest = new PageRequest(0, 10)
-
-        when: "searchEntityTypes is called with 'page' query"
         PageResponse<EntityType> response = notionApi.searchEntityTypes("page", pageRequest)
 
-        then: "it returns the 'page' entity type"
-        response != null
-        response.getResults().size() == 1
-        response.getResults()[0].getName() == "page"
+        assertNotNull(response)
+        assertEquals("Should return 1 entity type", 1, response.getResults().size())
+        assertEquals("Entity type should be 'page'", "page", response.getResults().get(0).getName())
     }
 
-    def "testSearchEntityTypes_WithQuery_NoMatch"() {
-        given: "a page request and a non-matching query"
+    @Test
+    void testSearchEntityTypes_WithQuery_NoMatch() {
         PageRequest pageRequest = new PageRequest(0, 10)
-
-        when: "searchEntityTypes is called with 'database' query"
         PageResponse<EntityType> response = notionApi.searchEntityTypes("database", pageRequest)
 
-        then: "it returns no entity types"
-        response != null
-        response.getResults().size() == 0
+        assertNotNull(response)
+        assertEquals("Should return 0 entity types", 0, response.getResults().size())
     }
 
-    def "testWriteEntity_CreatePage"() {
-        given: "a hub issue to create and a parent ID"
-        BasicHubIssue hubIssueToCreate = new BasicHubIssue(
-            key: new BasicIssueKey(null, "page", "page", null, new BasicIssueKey("parent-db-id", "database", "database")),
-            summary: "New Notion Page"
-        )
+    @Test
+    void testWriteEntity_CreatePage() {
+        BasicHubIssue hubIssueToCreate = new BasicHubIssue()
+        hubIssueToCreate.summary = "New Notion Page"
+        hubIssueToCreate.key = new BasicIssueKey(null, "page", "page", null, new BasicIssueKey("parent-db-id","database","database"))
+
 
         def createdPageDataFromClient = [
             id: "new-page-id-from-notion",
@@ -123,23 +138,28 @@ class NotionApiTest extends Specification {
             ]
         ]
 
-        when: "writeEntity is called to create a page"
-        // Spock's argument captor is implicit with closures for arguments
+        when(mockNotionClient.createPage(propertiesCaptor.capture(), eq("parent-db-id"))).thenReturn(createdPageDataFromClient)
+
+
         def result = notionApi.writeEntity(null, null, hubIssueToCreate, [], [])
 
-        then: "the notionClient creates the page and result is mapped"
-        1 * mockNotionClient.createPage({ Map props -> props.Title[0].text.content == "New Notion Page" }, "parent-db-id") >> createdPageDataFromClient
-        result != null
-        result.entity != null
-        result.entity.key.URN == "new-page-id-from-notion"
-        result.entity.summary == "New Notion Page"
+        assertNotNull(result)
+        assertNotNull(result.entity)
+        assertEquals("new-page-id-from-notion", result.entity.key.URN)
+        assertEquals("New Notion Page", result.entity.summary)
+
+        Map<String, Object> capturedProps = propertiesCaptor.getValue()
+        assertNotNull(capturedProps)
+        assertTrue(capturedProps.containsKey("Title"))
     }
 
-    def "testWriteEntity_UpdatePage"() {
-        given: "an existing page ID and a hub issue to update"
+    @Test
+    void testWriteEntity_UpdatePage() {
         String existingPageId = "existing-page-id"
         IIssueKey existingKey = new BasicIssueKey(existingPageId, "page", "page")
-        BasicHubIssue hubIssueToUpdate = new BasicHubIssue(key: existingKey, summary: "Updated Page Title")
+        BasicHubIssue hubIssueToUpdate = new BasicHubIssue()
+        hubIssueToUpdate.key = existingKey
+        hubIssueToUpdate.summary = "Updated Page Title"
 
         def updatedPageDataFromClient = [
             id: existingPageId,
@@ -147,23 +167,24 @@ class NotionApiTest extends Specification {
                 Title: [title: [[plain_text: "Updated Page Title"]]]
             ]
         ]
+        when(mockNotionClient.updatePage(eq(existingPageId), propertiesCaptor.capture())).thenReturn(updatedPageDataFromClient)
 
-        when: "writeEntity is called to update the page"
         def result = notionApi.writeEntity(existingKey, null, hubIssueToUpdate, [], [])
 
-        then: "the notionClient updates the page and result is mapped"
-        1 * mockNotionClient.updatePage(existingPageId, { Map props -> props.Title[0].text.content == "Updated Page Title" }) >> updatedPageDataFromClient
-        result != null
-        result.entity != null
-        result.entity.key.URN == existingPageId
-        result.entity.summary == "Updated Page Title"
+        assertNotNull(result)
+        assertNotNull(result.entity)
+        assertEquals(existingPageId, result.entity.key.URN)
+        assertEquals("Updated Page Title", result.entity.summary)
+
+        Map<String, Object> capturedProps = propertiesCaptor.getValue()
+        assertNotNull(capturedProps)
+        assertTrue(capturedProps.containsKey("Title"))
     }
 
-    def "testSearch_Success"() {
-        given: "a page request, query, and entity context"
+    @Test
+    void testSearch_Success() {
         PageRequest pageRequest = new PageRequest(0, 10, null)
         String query = "Test Query"
-        EntityKeyContext entityKeyContext = new EntityKeyContext("page")
 
         def notionSearchResult = [
             pages: [
@@ -173,65 +194,58 @@ class NotionApiTest extends Specification {
             nextCursor: "next_cursor_string",
             hasMore: true
         ]
+        // Ensure isNull() is imported for the third argument of searchPages if it's truly null
+        when(mockNotionClient.searchPages(eq(query), any(), isNull(String.class), eq(10))).thenReturn(notionSearchResult)
 
-        when: "search is called"
-        1 * mockNotionClient.searchPages(query, null, null, 10) >> notionSearchResult
-        PageResponse<IIssueKey> response = notionApi.search(query, null, entityKeyContext, pageRequest)
 
-        then: "the response is correctly mapped"
-        response != null
-        response.getResults().size() == 2
-        response.getResults()[0].getURN() == "page1"
-        response.getResults()[1].getURN() == "page2"
-        response.hasMore()
-        response.getNextPageStart() == "next_cursor_string"
+        PageResponse<IIssueKey> response = notionApi.search(query, null, new customconnectornode.domain.EntityKeyContext("page"), pageRequest)
+
+        assertNotNull(response)
+        assertEquals("Should return 2 issue keys", 2, response.getResults().size())
+        assertEquals("page1", response.getResults().get(0).getURN())
+        assertEquals("page2", response.getResults().get(1).getURN())
+        assertTrue("Should have more pages", response.hasMore())
+        assertEquals("next_cursor_string", response.getNextPageStart())
     }
 
-    def "testSearch_EmptyResult"() {
-        given: "a page request, query, and entity context for a non-existent item"
+    @Test
+    void testSearch_EmptyResult() {
         PageRequest pageRequest = new PageRequest(0, 10, null)
         String query = "NonExistent"
-        EntityKeyContext entityKeyContext = new EntityKeyContext("page")
 
         def notionSearchResult = [ pages: [], nextCursor: null, hasMore: false ]
+        when(mockNotionClient.searchPages(eq(query), any(), isNull(String.class), eq(10))).thenReturn(notionSearchResult)
 
-        when: "search is called"
-        1 * mockNotionClient.searchPages(query, null, null, 10) >> notionSearchResult
-        PageResponse<IIssueKey> response = notionApi.search(query, null, entityKeyContext, pageRequest)
+        PageResponse<IIssueKey> response = notionApi.search(query, null, new customconnectornode.domain.EntityKeyContext("page"), pageRequest)
 
-        then: "the response indicates no results"
-        response != null
-        response.getResults().size() == 0
-        !response.hasMore()
-        response.getNextPageStart() == null
+        assertNotNull(response)
+        assertEquals("Should return 0 issue keys", 0, response.getResults().size())
+        assert !response.hasMore() // Changed from assertFalse for Groovy style
+        assertNull("Next cursor should be null", response.getNextPageStart())
     }
 
-    def "testGetFileBodyStream_Success"() {
-        given: "a file ID and entity key"
+    @Test
+    void testGetFileBodyStream_Success() {
         String fileId = "file-id-or-url"
         IIssueKey entityKey = new BasicIssueKey("page-id", "page", "page")
 
-        when: "getFileBodyStream is called"
-        1 * mockNotionClient.downloadFile(fileId, entityKey) >> mockStreamingResponse
-        1 * mockStreamingResponse.getSource() >> mockSource
+        when(mockNotionClient.downloadFile(fileId, entityKey)).thenReturn(mockStreamingResponse)
+        when(mockStreamingResponse.getSource()).thenReturn(mockSource)
+
         Source<ByteString, ?> resultSource = notionApi.getFileBodyStream(fileId, entityKey, null)
 
-        then: "the correct source is returned"
-        resultSource != null
-        resultSource == mockSource
+        assertNotNull("Source should not be null", resultSource)
+        assertEquals("Should return the mocked source", mockSource, resultSource)
+        verify(mockNotionClient).downloadFile(fileId, entityKey)
     }
 
-    def "testGetFileBodyStream_ClientReturnsNull_ThrowsCategorizedException"() {
-        given: "a file ID and entity key"
+    @Test(expected = com.exalate.api.exception.CategorizedException.class)
+    void testGetFileBodyStream_ClientReturnsNull() {
         String fileId = "file-id-or-url"
         IIssueKey entityKey = new BasicIssueKey("page-id", "page", "page")
 
-        when: "getFileBodyStream is called and client download fails"
-        1 * mockNotionClient.downloadFile(fileId, entityKey) >> null
-        notionApi.getFileBodyStream(fileId, entityKey, null)
+        when(mockNotionClient.downloadFile(fileId, entityKey)).thenReturn(null)
 
-        then: "a CategorizedException is thrown"
-        // Spock's way of testing exceptions
-        thrown(com.exalate.api.exception.CategorizedException)
+        notionApi.getFileBodyStream(fileId, entityKey, null)
     }
 }
