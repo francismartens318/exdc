@@ -271,6 +271,14 @@ class TopicAccessClientImpl implements TopicAccessClient {
     @Override
     List<Topic> search(String query, Timestamp since) {
         // Compose the search query
+        if(query){
+            query=null
+        }
+      /*  if(!since){
+            if(query && query.equals("dummy=1")){
+                query=null
+            }
+        }*/
         String encodedQuery = query ? URLEncoder.encode(query, 'UTF-8') : ""
         String separator = encodedQuery ? '&' : ''
         String utcDate

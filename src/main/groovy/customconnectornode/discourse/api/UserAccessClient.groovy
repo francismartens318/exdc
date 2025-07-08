@@ -34,4 +34,6 @@ interface UserAccessClient {
      * @return A User object containing the user's information (e.g., username, email, roles, etc.).
      */
     User getUser(String userId)
+
+    String getUserEmailFromUserName(String userName)
 }

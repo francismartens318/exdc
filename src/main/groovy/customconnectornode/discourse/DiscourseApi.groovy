@@ -33,22 +33,26 @@ import com.exalate.api.domain.twintrace.INonPersistentTrace
 import com.exalate.api.exception.CategorizedException
 import com.exalate.basic.domain.BasicIssueKey
 import com.exalate.basic.domain.hubobject.v1.BasicHubAttachment
+import com.exalate.basic.domain.hubobject.v1.BasicHubComment
 import com.exalate.basic.domain.hubobject.v1.BasicHubIssue
+import com.exalate.basic.domain.hubobject.v1.BasicHubUser
 import com.exalate.domain.http.StreamingGroovyHttpResponse
 import com.exalate.replication.services.hubobject.ReplicaHelper
-import com.exalate.replication.services.issuetracker.HttpClient
 import customconnectornode.discourse.api.DiscourseCategoryAccessClient
 import com.exalate.replication.services.issuetracker.HttpClient
 import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.TopicAccessClient
+import customconnectornode.discourse.api.UserAccessClient
 import customconnectornode.discourse.domain.AttachmentMetaData
 import customconnectornode.discourse.domain.Post
 import customconnectornode.discourse.domain.Topic
+import customconnectornode.discourse.domain.User
 import customconnectornode.discourse.http.AttachmentClient
 import customconnectornode.discourse.http.DiscourseCategoryAccessClientImpl
 import customconnectornode.discourse.http.DiscourseClientException
 import customconnectornode.discourse.http.DiscourseClientImpl
 import customconnectornode.discourse.http.TopicAccessClientImpl
+import customconnectornode.discourse.http.UserAccessClientImpl
 import customconnectornode.discourse.transform.TopicReplica
 import customconnectornode.domain.EntityKeyContext
 import customconnectornode.domain.EntityWriteResult
@@ -74,6 +78,7 @@ class DiscourseApi implements IIssueTrackerApi {
     private final DiscourseCategoryAccessClient categoryAccessClient
     private final ReplicaHelper replicaHelper
     private final AttachmentClient attachmentClient
+    private final UserAccessClient userAccessClient
 
     TopicAccessClient getTopicAccessClient() {
         return topicAccessClient
@@ -87,6 +92,7 @@ class DiscourseApi implements IIssueTrackerApi {
         this.discourseClient = new DiscourseClientImpl(httpClient)
         this.categoryAccessClient = new DiscourseCategoryAccessClientImpl(discourseClient)
         this.topicAccessClient = new TopicAccessClientImpl(this.discourseClient,this.categoryAccessClient)
+        this.userAccessClient = new UserAccessClientImpl(this.discourseClient)
         this.attachmentClient = new AttachmentClient(discourseClient)
     }
 
@@ -118,7 +124,14 @@ class DiscourseApi implements IIssueTrackerApi {
         }
     }
 
-
+    void fetchPostUserEmail(BasicHubIssue basicHubIssue){
+     basicHubIssue.comments.each {
+         BasicHubComment comment->
+             BasicHubUser commentAuthor= comment.author as BasicHubUser
+             commentAuthor.email=userAccessClient.getUserEmailFromUserName(commentAuthor?.username)
+             comment.author = commentAuthor
+     }
+    }
 
     @Override
     IHubIssueReplica readEntity(@NotNull @Nonnull IIssueKey entityKey) throws CategorizedException {
@@ -141,6 +154,7 @@ class DiscourseApi implements IIssueTrackerApi {
         if (!topic) return null
 
         BasicHubIssue hubIssue = TopicReplica.toReplica(topic)
+        fetchPostUserEmail(hubIssue)
         fixAttachments(hubIssue)
 
         hubIssue

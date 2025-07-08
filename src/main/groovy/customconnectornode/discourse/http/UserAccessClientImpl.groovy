@@ -70,4 +70,15 @@ class UserAccessClientImpl implements UserAccessClient {
         // Create a User object using the fetched user details and email information.
         return User.fromJson(userJson.get("user"), emailJson.get("email"));
     }
+
+    @Override
+    String getUserEmailFromUserName(String userName) {
+        if(!userName)
+            return null
+        Map emailJson = discourseClient.get("/users/${userName}/emails.json");
+        if (!emailJson || !emailJson.containsKey("email")) {
+            throw new DiscourseClientException("Request for User with ${userName} didn't result in a parseable information structure.  Is the proper authentication used to retrieve email information?");
+        }
+        return emailJson.get("email")
+    }
 }
