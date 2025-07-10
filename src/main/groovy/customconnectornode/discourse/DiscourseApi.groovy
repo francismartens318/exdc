@@ -128,8 +128,11 @@ class DiscourseApi implements IIssueTrackerApi {
      basicHubIssue.comments.each {
          BasicHubComment comment->
              BasicHubUser commentAuthor= comment.author as BasicHubUser
-             commentAuthor.email=userAccessClient.getUserEmailFromUserName(commentAuthor?.username)
-             comment.author = commentAuthor
+             def commentAuthorEmail=userAccessClient.getUserEmailFromUserName(commentAuthor?.username)
+             if(commentAuthorEmail && commentAuthorEmail!="no_email") {
+                 commentAuthor.email=commentAuthorEmail
+                 comment.author = commentAuthor
+             }
      }
     }
 

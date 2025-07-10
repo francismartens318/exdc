@@ -125,6 +125,8 @@ class DiscourseApiTest extends Specification {
         List<List<String>> methodBodyPairs = [
                 ["GET", getClass().getResource('/json/7.json').text],
                 ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/admin_emails.json').text],
+                ["GET", getClass().getResource('/json/francis_emails.json').text]
         ]
 
         mockHttpResponses(methodBodyPairs)
@@ -493,7 +495,10 @@ class DiscourseApiTest extends Specification {
         List<List<String>> methodBodyPairs = [
                 ["GET", getClass().getResource('/json/317.json').text], // return a list of topics and posts that are matching any query
                 ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/admin_emails.json').text],
+                ["GET", getClass().getResource('/json/system_emails.json').text],
                 ["GET", getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f-meta.json').text], // return a list of topics and posts that are matching any query
+
         ]
         mockHttpResponses(methodBodyPairs)
 
@@ -529,6 +534,7 @@ class DiscourseApiTest extends Specification {
         List<List<String>> methodBodyPairs = [
                 ["GET", getClass().getResource('/json/320.json').text],
                 ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/admin_emails.json').text],
                 ["GET", getClass().getResource('/json/fca98506638111b38fc57bb49ed7ac6384a66567-meta.json').text], // return a list of topics and posts that are matching any query
                 ["GET", getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f-meta.json').text], // return a list of topics and posts that are matching any query
 
@@ -675,6 +681,8 @@ class DiscourseApiTest extends Specification {
         List<List<String>> methodBodyPairs = [
                 ["GET", getClass().getResource('/solved/topic_333.json').text],
                 ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/admin_emails.json').text]
+
         ]
 
         mockHttpResponses(methodBodyPairs)
@@ -705,6 +713,8 @@ class DiscourseApiTest extends Specification {
         List<List<String>> methodBodyPairs = [
                 ["GET", getClass().getResource('/solved/topic_7.json').text],
                 ["GET", getClass().getResource('/json/categories.json').text],
+                ["GET", getClass().getResource('/json/admin_emails.json').text],
+                ["GET", getClass().getResource('/json/francis_emails.json').text]
         ]
 
         mockHttpResponses(methodBodyPairs)

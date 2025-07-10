@@ -26,6 +26,10 @@ package customconnectornode.discourse.http
 import customconnectornode.discourse.api.DiscourseClient
 import customconnectornode.discourse.api.UserAccessClient
 import customconnectornode.discourse.domain.User
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Implementation of the UserAccessClient interface providing access to user information.
@@ -36,6 +40,10 @@ class UserAccessClientImpl implements UserAccessClient {
 
     // A client used to interact with the Discourse API for making HTTP requests.
     private final DiscourseClient discourseClient;
+    private final Map<String, String> userEmailCache = new ConcurrentHashMap<>()
+
+    private static final Logger log = LoggerFactory.getLogger(UserAccessClientImpl.class)
+
 
     /**
      * Constructor to initialize the UserAccessClientImpl with the required DiscourseClient.
@@ -72,13 +80,27 @@ class UserAccessClientImpl implements UserAccessClient {
     }
 
     @Override
+    @Override
     String getUserEmailFromUserName(String userName) {
-        if(!userName)
-            return null
-        Map emailJson = discourseClient.get("/users/${userName}/emails.json");
+        if(!userName) return null
+
+        // Check cache first
+        String cachedEmail = userEmailCache.get(userName)
+        if(cachedEmail != null) {
+            log.debug("User email found from cache:"+cachedEmail+" for user:"+userName)
+            return cachedEmail
+        }
+        log.debug("Could not found email from cache for user:"+userName)
+
+        // Otherwise, fetch from API
+        Map emailJson = discourseClient.get("/users/${userName}/emails.json")
         if (!emailJson || !emailJson.containsKey("email")) {
             throw new DiscourseClientException("Request for User with ${userName} didn't result in a parseable information structure.  Is the proper authentication used to retrieve email information?");
         }
-        return emailJson.get("email")
+        String email = emailJson.get("email")
+        // Store in cache
+        userEmailCache.put(userName, email)
+
+        return email
     }
 }

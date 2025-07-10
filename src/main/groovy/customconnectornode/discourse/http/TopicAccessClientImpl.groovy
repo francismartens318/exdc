@@ -271,7 +271,7 @@ class TopicAccessClientImpl implements TopicAccessClient {
     @Override
     List<Topic> search(String query, Timestamp since) {
         // Compose the search query
-        if(query){
+        if(query.equals("dummy=1")){
             query=null
         }
       /*  if(!since){
