@@ -517,6 +517,7 @@ class DiscourseApiTest extends Specification {
                 ["GET", getClass().getResource('/json/319.json').text], // return a list of topics and posts that are matching any query["GET", getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f-meta.json').text], // return a list of topics and posts that are matching any query
                 ["GET", getClass().getResource('/json/categories.json').text],
                 ["GET", getClass().getResource('/json/1117b3d1cd715f2a4c56408a4cec986285a55d8f-meta.json').text], // return a list of topics and posts that are matching any query
+                ["GET", getClass().getResource('/json/admin_emails.json').text]
         ]
         mockHttpResponses(methodBodyPairs)
 
@@ -608,6 +609,7 @@ class DiscourseApiTest extends Specification {
                 ["GET", getClass().getResource('/json/319.json').text],
                 ["GET", getClass().getResource('/json/categories.json').text],
                 ["GET", null, fileMetaHeaders],  // return the headers which are expected at this stage of the test.
+                ["GET", getClass().getResource('/json/admin_emails.json').text]
         ]
 
         mockHttpResponses(methodBodyPairs)

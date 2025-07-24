@@ -136,10 +136,25 @@ class TopicReplica {
         // INTSNS-70 - ensure the url of the entity is the appropriate one
         replica.setEntityUrl(topic.origin_url?.replaceAll('\\.json$', ''))
         replica.accepted_answer = topic.accepted_answer
+        BasicHubUser topicCreatedByUser=getTopicCreatedBy(topic)
+        replica.setReporter(topicCreatedByUser)
         return replica
     }
 
-
+    private static BasicHubUser getTopicCreatedBy(Topic topic){
+        Map topicDetails=topic?.details
+        if(topicDetails){
+            Map createdByDetails=topicDetails.get("created_by") as Map
+            if(createdByDetails){
+                BasicHubUser user=new BasicHubUser()
+                user.key=createdByDetails.get("id")
+                user.username=createdByDetails.get("username")
+                user.displayName=createdByDetails.get("name")
+                return user
+            }
+        }
+        return null
+    }
     private static void addAttachmentsToReplica(BasicHubIssue replica, BasicHubComment sourceComment, List<String> postAttachments) {
 
         // first collect all potential attachments from the post

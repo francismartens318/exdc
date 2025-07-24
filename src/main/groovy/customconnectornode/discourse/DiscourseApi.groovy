@@ -136,6 +136,13 @@ class DiscourseApi implements IIssueTrackerApi {
      }
     }
 
+    void setReporterEmail(BasicHubUser basicHubUser){
+        if(basicHubUser?.username){
+            def email=userAccessClient.getUserEmailFromUserName(basicHubUser?.username)
+            basicHubUser.email=email
+        }
+    }
+
     @Override
     IHubIssueReplica readEntity(@NotNull @Nonnull IIssueKey entityKey) throws CategorizedException {
         log.debug("Attempting to read entity topic with key: {}", entityKey)
@@ -159,7 +166,7 @@ class DiscourseApi implements IIssueTrackerApi {
         BasicHubIssue hubIssue = TopicReplica.toReplica(topic)
         fetchPostUserEmail(hubIssue)
         fixAttachments(hubIssue)
-
+        setReporterEmail(hubIssue.getReporter())
         hubIssue
     }
 
