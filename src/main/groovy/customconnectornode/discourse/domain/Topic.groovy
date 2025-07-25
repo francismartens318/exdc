@@ -127,7 +127,7 @@ class Topic {
     Boolean summarizable
     List<String> tags
     Map<String, String> tags_descriptions
-    String thumbnails
+    List thumbnails
     List timeline_lookup
     String title
     String topic_id
