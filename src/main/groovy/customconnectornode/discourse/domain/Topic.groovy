@@ -226,6 +226,15 @@ class Topic {
      */
     static Topic fromJson(Map topicData, String sourceUrl = null) {
         ObjectMapper mapper = new ObjectMapper()
+
+        // Normalize tags: Discourse API may return tags as objects (e.g., [{"name": "tag1", ...}])
+        // instead of simple strings (e.g., ["tag1", "tag2"])
+        if (topicData.tags instanceof List) {
+            topicData.tags = (topicData.tags as List).collect { tag ->
+                tag instanceof Map ? tag.name?.toString() : tag?.toString()
+            }
+        }
+
         Topic topic = mapper.convertValue(topicData, Topic.class)
 
         if (!topic) {

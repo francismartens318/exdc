@@ -386,6 +386,28 @@ class TopicReplicaTest extends Specification {
         result.tags.containsAll(["testcase", "spock"])
     }
 
+    def "fromJson should handle tags as objects from search API"() {
+        given:
+        def topicData = [
+            id: 42,
+            title: "Topic with object tags",
+            tags: [
+                [id: 1, name: "testcase", description: "Test case tag"],
+                [id: 2, name: "spock", description: "Spock tag"]
+            ],
+            category_id: 4
+        ]
+
+        when:
+        Topic result = Topic.fromJson(topicData)
+
+        then:
+        result != null
+        result.id == 42
+        result.tags.size() == 2
+        result.tags.containsAll(["testcase", "spock"])
+    }
+
     def "toReplica should ensure entityUrl does not end with .json"() {
         given:
         Topic topic = new Topic().builder()
