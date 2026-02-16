@@ -67,8 +67,8 @@ class TopicAccessClientImpl implements TopicAccessClient {
             throw new DiscourseClientException("Topic has no category specified")
         }
 
-        topic.category = topic.category ?: categoryAccessClient.fetchCategoryById(topic.category_id).name
-        topic.category_id = topic.category_id ?: categoryAccessClient.fetchCategoryByName(topic.category).id
+        topic.category = topic.category ?: categoryAccessClient.fetchCategoryById(topic.category_id)?.name
+        topic.category_id = topic.category_id ?: categoryAccessClient.fetchCategoryByName(topic.category)?.id
     }
 
     /**
