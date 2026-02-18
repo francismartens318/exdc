@@ -189,6 +189,77 @@ class TopicAccessClientImplTest extends Specification {
         result == []
     }
 
+    def "search should return empty list when query is dummy=1 and since is null"() {
+        when:
+        def result = topicAccessClient.search("dummy=1", null)
+
+        then:
+        result == []
+    }
+
+    def "search should filter topics by allowed category ids"() {
+        given:
+        System.setProperty("TRACKER_CATEGORY_IDS", "7,22")
+        def since = Timestamp.valueOf("2026-02-01 00:00:00")
+        def searchResult = [
+            topics: [
+                [id: 1, title: "Allowed topic", category_id: 7, created_at: "2026-02-05T10:00:00.000Z", last_posted_at: "2026-02-05T10:00:00.000Z"],
+                [id: 2, title: "Blocked topic", category_id: 27, created_at: "2026-02-05T10:00:00.000Z", last_posted_at: "2026-02-05T10:00:00.000Z"],
+                [id: 3, title: "Another allowed topic", category_id: 22, created_at: "2026-02-05T10:00:00.000Z", last_posted_at: "2026-02-05T10:00:00.000Z"]
+            ]
+        ]
+        discourseClient.get(_, _) >> searchResult
+
+        when:
+        def result = topicAccessClient.search("dummy=1", since)
+
+        then:
+        result.size() == 2
+        result.collect { it.id } == [1, 3]
+
+        cleanup:
+        System.clearProperty("TRACKER_CATEGORY_IDS")
+    }
+
+    def "search should return all topics when TRACKER_CATEGORY_IDS is not set"() {
+        given:
+        System.clearProperty("TRACKER_CATEGORY_IDS")
+        def since = Timestamp.valueOf("2026-02-01 00:00:00")
+        def searchResult = [
+            topics: [
+                [id: 1, title: "Topic 1", category_id: 7, created_at: "2026-02-05T10:00:00.000Z", last_posted_at: "2026-02-05T10:00:00.000Z"],
+                [id: 2, title: "Topic 2", category_id: 27, created_at: "2026-02-05T10:00:00.000Z", last_posted_at: "2026-02-05T10:00:00.000Z"]
+            ]
+        ]
+        discourseClient.get(_, _) >> searchResult
+
+        when:
+        def result = topicAccessClient.search("dummy=1", since)
+
+        then:
+        result.size() == 2
+    }
+
+    def "search should use space separator for after clause in query"() {
+        given:
+        System.clearProperty("TRACKER_CATEGORY_IDS")
+        def since = Timestamp.valueOf("2026-02-01 00:00:00")
+        def capturedUrl = null
+        discourseClient.get(_, _) >> { args ->
+            capturedUrl = args[0]
+            return [topics: []]
+        }
+
+        when:
+        topicAccessClient.search("test query", since)
+
+        then:
+        capturedUrl != null
+        // after: should be inside the q parameter (space-separated), not a separate URL param
+        !(capturedUrl as String).contains("&after")
+        URLDecoder.decode(capturedUrl as String, 'UTF-8').contains("test query after:")
+    }
+
     def "downloadAttachment should delegate to discourseClient"() {
         given:
         def response = Mock(StreamingGroovyHttpResponse)

@@ -268,19 +268,23 @@ class TopicAccessClientImpl implements TopicAccessClient {
      * @param since Filters results to topics updated or created after this timestamp.
      * @return A list of Topic objects matching the search criteria.
      */
+    private static List<Integer> getAllowedCategoryIds() {
+        String categoryIds = System.getProperty("TRACKER_CATEGORY_IDS") ?: System.getenv("TRACKER_CATEGORY_IDS")
+        if (!categoryIds) {
+            return []
+        }
+        return categoryIds.split(",").collect { it.trim().toInteger() }
+    }
+
     @Override
     List<Topic> search(String query, Timestamp since) {
+        List<Integer> allowedCategoryIds = getAllowedCategoryIds()
+
         // Compose the search query
         if(query.equals("dummy=1")){
             query=null
         }
-      /*  if(!since){
-            if(query && query.equals("dummy=1")){
-                query=null
-            }
-        }*/
-        String encodedQuery = query ? URLEncoder.encode(query, 'UTF-8') : ""
-        String separator = encodedQuery ? '&' : ''
+        String searchQuery = query ?: ""
         String utcDate
 
         // Add a timestamp filter if provided
@@ -290,23 +294,26 @@ class TopicAccessClientImpl implements TopicAccessClient {
             utcDate = sdf.format(new Date(since.getTime()))
 
             // Adjust query to filter results updated after the specified date
-            encodedQuery = "${encodedQuery}${separator}after:${utcDate.take(10)}"
+            String separator = searchQuery ? ' ' : ''
+            searchQuery = "${searchQuery}${separator}after:${utcDate.take(10)}"
         }
 
-        if (!encodedQuery) {
+        if (!searchQuery) {
             // Return empty list for empty queries
             return []
         }
 
-        log.debug("Fetching topics using the query ${encodedQuery}")
+        String encodedQuery = URLEncoder.encode(searchQuery, 'UTF-8')
+        log.debug("Fetching topics using the query ${searchQuery}")
 
         Map searchResult = discourseClient.get("/search.json?q=${encodedQuery}", [:])
 
-        log.debug("Search resulted in ${searchResult?.size()} entries (not yet filtered)")
+        log.debug("Search resulted in ${searchResult?.topics?.size() ?: 0} entries (not yet filtered)")
 
-        // Collect and filter topics based on the timestamp
-        return searchResult.topics?.collect { Topic.fromJson(it) }?.findAll { topic ->
-            topic.last_posted_at >= utcDate || topic.created_at >= utcDate
+        // Collect and filter topics based on the timestamp and allowed categories
+        return searchResult.topics?.collect { Topic.fromJson(it as Map) }?.findAll { topic ->
+            (topic.last_posted_at >= utcDate || topic.created_at >= utcDate) &&
+            (!allowedCategoryIds || allowedCategoryIds.contains(topic.category_id))
         }
     }
 
